@@ -1388,3 +1388,708 @@ footer {
         padding: 7px 10px;
     }
 }
+
+/* ADICIONE ESTE CÓDIGO AO FINAL DO SEU ARQUIVO CSS */
+
+/* ==================== */
+/* RESPONSIVIDADE OTIMIZADA */
+/* ==================== */
+
+/* TABLETS (768px - 1024px) */
+@media (max-width: 1024px) {
+    .container {
+        padding: 15px;
+        gap: 20px;
+    }
+    
+    .card {
+        padding: 20px;
+    }
+    
+    /* Calendário mensal ajustado */
+    .calendario-grid {
+        gap: 5px;
+    }
+    
+    .calendario-grid .dia {
+        min-height: 70px;
+        padding: 10px 5px;
+    }
+    
+    .dia-numero {
+        font-size: 1.2rem;
+    }
+    
+    .dia-header {
+        font-size: 0.75rem;
+    }
+    
+    /* Ajustes nas regras */
+    .regras-grid {
+        gap: 15px;
+    }
+    
+    .regra-item {
+        padding: 15px;
+    }
+}
+
+/* TABLETS PEQUENOS E CELULARES GRANDES (600px - 768px) */
+@media (max-width: 768px) {
+    /* Header ajustado */
+    .header {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+        gap: 15px;
+    }
+    
+    .header-left {
+        width: 100%;
+    }
+    
+    .header-left h1 {
+        font-size: 1.8rem;
+    }
+    
+    .header-right {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .header button,
+    .admin-link {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        flex: 0 1 auto;
+        min-width: 140px;
+    }
+    
+    /* Calendário header ajustado */
+    .calendario-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .nav-mes {
+        justify-content: center;
+    }
+    
+    .view-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .view-btn {
+        padding: 8px 20px;
+    }
+    
+    /* CALENDÁRIO MENSAL - REESTRUTURAÇÃO COMPLETA */
+    .calendario-grid {
+        grid-template-columns: repeat(7, 1fr);
+        gap: 3px;
+        margin: 0 -5px;
+    }
+    
+    .calendario-grid .dia {
+        min-height: 60px;
+        padding: 5px 2px;
+        border-radius: 5px;
+        margin: 1px;
+    }
+    
+    .dia-header {
+        font-size: 0.65rem;
+        display: none; /* Oculta nome completo do dia */
+    }
+    
+    /* Mostra apenas abreviação dos dias da semana */
+    .calendario-grid .dia:nth-child(7n+1) .dia-header::before { content: "D"; }
+    .calendario-grid .dia:nth-child(7n+2) .dia-header::before { content: "S"; }
+    .calendario-grid .dia:nth-child(7n+3) .dia-header::before { content: "T"; }
+    .calendario-grid .dia:nth-child(7n+4) .dia-header::before { content: "Q"; }
+    .calendario-grid .dia:nth-child(7n+5) .dia-header::before { content: "Q"; }
+    .calendario-grid .dia:nth-child(7n+6) .dia-header::before { content: "S"; }
+    .calendario-grid .dia:nth-child(7n+7) .dia-header::before { content: "S"; }
+    
+    .dia-header::before {
+        display: block;
+        font-weight: bold;
+        font-size: 0.7rem;
+        color: #004aad;
+    }
+    
+    .dia-numero {
+        font-size: 1rem;
+        font-weight: bold;
+        margin: 3px 0;
+    }
+    
+    /* Dias ocupados em mobile - versão simplificada */
+    .calendario-grid .dia.ocupado {
+        min-height: 65px;
+        position: relative;
+        padding-top: 8px;
+    }
+    
+    .calendario-grid .dia.ocupado::before {
+        width: 14px;
+        height: 14px;
+        font-size: 8px;
+        top: 3px;
+        right: 3px;
+    }
+    
+    /* Oculta informações detalhadas em mobile */
+    .info-turnos,
+    .turno-info,
+    .turno-titulo,
+    .responsavel,
+    .disponivel-texto {
+        display: none !important;
+    }
+    
+    /* Indicador simplificado para dias ocupados */
+    .calendario-grid .dia.ocupado::after {
+        content: '';
+        position: absolute;
+        bottom: 3px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #ffc107;
+    }
+    
+    .calendario-grid .dia.ocupado-tarde::after {
+        background-color: #17a2b8;
+    }
+    
+    .calendario-grid .dia.ocupado-ambos::after {
+        background: linear-gradient(90deg, #ffc107 50%, #17a2b8 50%);
+        width: 8px;
+        height: 8px;
+    }
+    
+    /* Visualização semanal em tablets */
+    .tabela-turnos {
+        overflow-x: auto;
+        margin: 0 -15px;
+        padding: 0 15px;
+        border-radius: 5px;
+    }
+    
+    .turno-header,
+    .turno-linha {
+        min-width: 550px;
+        grid-template-columns: 90px repeat(5, 1fr);
+    }
+    
+    .hora-col,
+    .dia-col {
+        padding: 10px 5px;
+        font-size: 0.85rem;
+        min-height: 50px;
+    }
+    
+    /* REGRAS - LAYOUT OTIMIZADO */
+    .regras-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+    }
+    
+    .regras-header h2 {
+        font-size: 1.6rem;
+        margin-bottom: 8px;
+    }
+    
+    .regras-header .subheader {
+        font-size: 0.9rem;
+        margin: 3px 0;
+    }
+    
+    .regras-grid {
+        gap: 12px;
+    }
+    
+    .regra-item {
+        flex-direction: row;
+        align-items: flex-start;
+        padding: 12px 15px;
+        gap: 15px;
+        text-align: left;
+    }
+    
+    .regra-numero {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .regra-titulo {
+        font-size: 0.95rem;
+        margin-bottom: 5px;
+    }
+    
+    .regra-descricao {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+    
+    .coordenador p {
+        font-size: 0.9rem;
+        padding: 8px 15px;
+    }
+    
+    /* Modal ajustado */
+    .modal-content {
+        padding: 20px;
+        margin: 10px;
+        width: calc(100% - 20px);
+        max-width: 500px;
+    }
+    
+    .dias-selecao {
+        grid-template-columns: 1fr;
+    }
+    
+    .calendario-mini-grid {
+        gap: 2px;
+    }
+    
+    .dia-mini {
+        width: 26px;
+        height: 26px;
+        font-size: 0.75rem;
+    }
+    
+    /* Legenda ajustada */
+    .legenda-disponibilidade {
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px;
+    }
+    
+    .item-legenda {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* CELULARES (480px - 600px) */
+@media (max-width: 600px) {
+    /* Header mais compacto */
+    .header {
+        padding: 12px 10px;
+        gap: 10px;
+    }
+    
+    .header-left h1 {
+        font-size: 1.6rem;
+    }
+    
+    .header-left span {
+        font-size: 0.8rem;
+    }
+    
+    .header-right {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .header button,
+    .admin-link {
+        padding: 7px 12px;
+        font-size: 0.85rem;
+        min-width: 120px;
+        flex: 1;
+    }
+    
+    /* Container ajustado */
+    .container {
+        padding: 10px;
+        gap: 15px;
+    }
+    
+    .card {
+        padding: 15px;
+        border-radius: 8px;
+    }
+    
+    /* Calendário ainda mais compacto */
+    .calendario-grid {
+        gap: 2px;
+    }
+    
+    .calendario-grid .dia {
+        min-height: 50px;
+        padding: 4px 1px;
+    }
+    
+    .dia-numero {
+        font-size: 0.9rem;
+    }
+    
+    .calendario-grid .dia.ocupado {
+        min-height: 55px;
+    }
+    
+    /* Visualização semanal em celular */
+    .turno-header,
+    .turno-linha {
+        min-width: 450px;
+        grid-template-columns: 80px repeat(5, 1fr);
+    }
+    
+    .hora-col,
+    .dia-col {
+        padding: 8px 3px;
+        font-size: 0.8rem;
+        min-height: 45px;
+    }
+    
+    /* Regras mais compactas */
+    .regras-header h2 {
+        font-size: 1.4rem;
+    }
+    
+    .regras-header .subheader {
+        font-size: 0.8rem;
+    }
+    
+    .regra-item {
+        padding: 10px;
+        gap: 12px;
+    }
+    
+    .regra-numero {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+    }
+    
+    .regra-titulo {
+        font-size: 0.9rem;
+    }
+    
+    .regra-descricao {
+        font-size: 0.8rem;
+    }
+    
+    /* Modal em celular */
+    .modal-content {
+        padding: 15px;
+    }
+    
+    .modal-content h2 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+    }
+    
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* CELULARES PEQUENOS (até 480px) */
+@media (max-width: 480px) {
+    /* Header otimizado para telas pequenas */
+    .header {
+        padding: 10px 8px;
+        gap: 8px;
+    }
+    
+    .header-left h1 {
+        font-size: 1.5rem;
+        margin-bottom: 3px;
+    }
+    
+    .header-left span {
+        font-size: 0.75rem;
+    }
+    
+    .header-right {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .header button,
+    .admin-link {
+        width: 100%;
+        max-width: 100%;
+        margin: 2px 0;
+        padding: 8px 12px;
+    }
+    
+    /* Container sem margens laterais */
+    .container {
+        padding: 8px;
+        gap: 12px;
+    }
+    
+    .card {
+        padding: 12px;
+        border-radius: 6px;
+    }
+    
+    /* Calendário ultra compacto */
+    .calendario-header {
+        gap: 10px;
+    }
+    
+    #tituloCalendario {
+        font-size: 1.1rem;
+        min-width: 150px;
+    }
+    
+    .nav-mes button {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+    
+    .calendario-grid {
+        gap: 1px;
+        margin: 0 -2px;
+    }
+    
+    .calendario-grid .dia {
+        min-height: 45px;
+        padding: 3px 0;
+        font-size: 0.8rem;
+    }
+    
+    .dia-numero {
+        font-size: 0.85rem;
+        margin: 2px 0;
+    }
+    
+    .dia-header::before {
+        font-size: 0.65rem;
+    }
+    
+    .calendario-grid .dia.ocupado {
+        min-height: 50px;
+    }
+    
+    .calendario-grid .dia.ocupado::after {
+        width: 5px;
+        height: 5px;
+        bottom: 2px;
+    }
+    
+    /* Visualização semanal em celular pequeno */
+    .tabela-turnos {
+        margin: 0 -8px;
+        padding: 0 8px;
+    }
+    
+    .turno-header,
+    .turno-linha {
+        min-width: 380px;
+        grid-template-columns: 70px repeat(5, 1fr);
+    }
+    
+    .hora-col,
+    .dia-col {
+        padding: 6px 2px;
+        font-size: 0.75rem;
+        min-height: 40px;
+    }
+    
+    /* Regras otimizadas para telas pequenas */
+    .regras-header {
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+    }
+    
+    .regras-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .regra-item {
+        flex-direction: column;
+        text-align: center;
+        padding: 10px;
+        gap: 8px;
+    }
+    
+    .regra-numero {
+        margin: 0 auto;
+    }
+    
+    .regra-titulo {
+        font-size: 0.85rem;
+    }
+    
+    .regra-descricao {
+        font-size: 0.75rem;
+    }
+    
+    .coordenador {
+        margin-top: 15px;
+        padding-top: 15px;
+    }
+    
+    .coordenador p {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+        width: 100%;
+    }
+    
+    /* Modal em telas muito pequenas */
+    .modal {
+        padding: 5px;
+    }
+    
+    .modal-content {
+        padding: 12px;
+        margin: 5px;
+        width: calc(100% - 10px);
+    }
+    
+    .calendario-mini-grid {
+        gap: 1px;
+    }
+    
+    .dia-mini {
+        width: 22px;
+        height: 22px;
+        font-size: 0.65rem;
+    }
+}
+
+/* ORIENTAÇÃO PAISAGEM EM DISPOSITIVOS MÓVEIS */
+@media (max-width: 768px) and (orientation: landscape) {
+    .header {
+        flex-direction: row;
+        padding: 10px 15px;
+    }
+    
+    .header-left {
+        flex: 1;
+        text-align: left;
+    }
+    
+    .header-right {
+        flex: none;
+        justify-content: flex-end;
+    }
+    
+    .header button,
+    .admin-link {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        min-width: auto;
+    }
+    
+    .calendario-grid {
+        gap: 2px;
+    }
+    
+    .calendario-grid .dia {
+        min-height: 55px;
+    }
+    
+    .regras-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .regra-item {
+        height: auto;
+    }
+}
+
+/* TELAS MUITO PEQUENAS (até 360px) */
+@media (max-width: 360px) {
+    /* Ajustes finos para telas muito pequenas */
+    .calendario-grid .dia {
+        min-height: 42px;
+        font-size: 0.75rem;
+    }
+    
+    .dia-numero {
+        font-size: 0.8rem;
+    }
+    
+    .turno-header,
+    .turno-linha {
+        min-width: 350px;
+        grid-template-columns: 65px repeat(5, 1fr);
+    }
+    
+    .hora-col,
+    .dia-col {
+        padding: 5px 1px;
+        font-size: 0.7rem;
+    }
+    
+    .regras-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    .regra-item {
+        padding: 8px;
+    }
+}
+
+/* AJUSTES DE ALTURA PARA MODAL COM TECLADO */
+@media (max-height: 600px) {
+    .modal {
+        align-items: flex-start;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    
+    .modal-content {
+        max-height: calc(100vh - 20px);
+        overflow-y: auto;
+    }
+}
+
+/* MELHORIAS DE LEGIBILIDADE */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    
+    h1, h2, h3 {
+        line-height: 1.3;
+    }
+    
+    /* Garantir que o texto não fique muito pequeno */
+    .card * {
+        min-font-size: 12px;
+    }
+}
+
+/* AJUSTES PARA EVITAR QUEBRA DE LAYOUT */
+.calendario-grid,
+.regras-grid,
+.tabela-turnos {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* REMOVER MARGENS NEGATIVAS EM TELAS MUITO PEQUENAS */
+@media (max-width: 320px) {
+    .calendario-grid,
+    .tabela-turnos {
+        margin: 0;
+    }
+    
+    .container {
+        padding: 5px;
+    }
+}
