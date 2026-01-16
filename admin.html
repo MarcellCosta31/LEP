@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>LEP - Painel Administrativo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style-admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>LEP Admin</h2>
+                <p id="adminEmailDisplay">admin@exemplo.com</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-view="dashboard">
+                    <i class="fas fa-chart-bar"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item" data-view="reservas">
+                    <i class="fas fa-calendar-check"></i> Reservas
+                </a>
+                <a href="#" class="nav-item" data-view="relatorios">
+                    <i class="fas fa-file-alt"></i> Relatórios
+                </a>
+                <a href="#" class="nav-item" data-view="usuarios">
+                    <i class="fas fa-users"></i> Administradores
+                </a>
+                <a href="#" class="nav-item" data-view="configuracoes">
+                    <i class="fas fa-cog"></i> Configurações
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button id="btnLogout" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <h1 id="pageTitle">Dashboard</h1>
+                <div class="user-info">
+                    <span id="userName">Administrador</span>
+                    <div class="user-avatar">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard View -->
+            <div id="dashboardView" class="content-view active-view">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <h3>Total Reservas</h3>
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stat-number" id="totalReservas">0</div>
+                        <div class="stat-trend" id="reservasTrend">Carregando...</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <h3>Reservas Aprovadas</h3>
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-number" id="reservasAprovadas">0</div>
+                        <div class="stat-subtitle" id="aprovadasPercent">0% do total</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <h3>Reservas Pendentes</h3>
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-number" id="reservasPendentes">0</div>
+                        <div class="stat-subtitle">Aguardando aprovação</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <h3>Usuários</h3>
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-number" id="totalUsuarios">0</div>
+                        <div class="stat-subtitle">Administradores</div>
+                    </div>
+                </div>
+
+                <div class="recent-activity">
+                    <h2>Atividade Recente</h2>
+                    <div class="activity-list" id="recentActivity">
+                        <div class="activity-item loading">
+                            Carregando atividades...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reservas View -->
+            <div id="reservasView" class="content-view">
+                <div class="view-header">
+                    <h2>Gerenciar Reservas</h2>
+                    <div class="view-actions">
+                        <div class="filters">
+                            <select id="filterStatus" class="filter-select">
+                                <option value="all">Todos os status</option>
+                                <option value="aprovado">Aprovadas</option>
+                                <option value="pendente">Pendentes</option>
+                                <option value="recusado">Recusadas</option>
+                            </select>
+                            <input type="date" id="filterDate" class="filter-date">
+                            <button id="btnApplyFilter" class="btn-primary">
+                                <i class="fas fa-filter"></i> Filtrar
+                            </button>
+                            <button id="btnClearFilter" class="btn-secondary">
+                                <i class="fas fa-times"></i> Limpar
+                            </button>
+                        </div>
+                        <button id="btnExportReservas" class="btn-success">
+                            <i class="fas fa-file-export"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="reservas-table-container">
+                    <table class="reservas-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="selectAll"></th>
+                                <th>Data</th>
+                                <th>Responsável</th>
+                                <th>Dias</th>
+                                <th>Turno</th>
+                                <th>Status</th>
+                                <th>Criado em</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reservasTableBody">
+                            <tr>
+                                <td colspan="8" class="loading-cell">
+                                    Carregando reservas...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer">
+                    <div class="selected-count">
+                        <span id="selectedCount">0</span> selecionados
+                    </div>
+                    <div class="bulk-actions">
+                        <select id="bulkAction" class="action-select">
+                            <option value="">Ações em massa</option>
+                            <option value="approve">Aprovar selecionados</option>
+                            <option value="reject">Recusar selecionados</option>
+                            <option value="delete">Excluir selecionados</option>
+                        </select>
+                        <button id="btnApplyBulk" class="btn-primary" disabled>
+                            Aplicar
+                        </button>
+                    </div>
+                    <div class="pagination">
+                        <button id="prevPage" class="page-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span id="pageInfo">Página 1</span>
+                        <button id="nextPage" class="page-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relatórios View -->
+            <div id="relatoriosView" class="content-view">
+                <div class="view-header">
+                    <h2>Relatórios e Estatísticas</h2>
+                    <div class="view-actions">
+                        <button id="btnGenerateReport" class="btn-primary">
+                            <i class="fas fa-chart-pie"></i> Gerar Relatório
+                        </button>
+                        <button id="btnPrintReport" class="btn-secondary">
+                            <i class="fas fa-print"></i> Imprimir
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-filters">
+                    <div class="filter-group">
+                        <label>Período:</label>
+                        <input type="date" id="reportStartDate" class="filter-date">
+                        <span>até</span>
+                        <input type="date" id="reportEndDate" class="filter-date">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Tipo de Relatório:</label>
+                        <select id="reportType" class="filter-select">
+                            <option value="reservas">Reservas por período</option>
+                            <option value="turnos">Uso por turno</option>
+                            <option value="usuarios">Reservas por responsável</option>
+                            <option value="ocupacao">Reservas por ocupação</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Formato:</label>
+                        <select id="reportFormat" class="filter-select">
+                            <option value="html">HTML (Visual)</option>
+                            <option value="pdf">PDF</option>
+                            <option value="csv">CSV (Excel)</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="report-results">
+                    <div class="chart-container">
+                        <canvas id="reportChart"></canvas>
+                    </div>
+                    
+                    <div class="report-table-container" id="reportTableContainer">
+                        <h3>Dados do Relatório</h3>
+                        <div class="table-placeholder">
+                            Selecione os filtros e clique em "Gerar Relatório"
+                        </div>
+                    </div>
+                    
+                    <div class="report-summary" id="reportSummary">
+                        <!-- Sumário será gerado aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usuários View -->
+            <div id="usuariosView" class="content-view">
+                <div class="view-header">
+                    <h2>Gerenciar Administradores</h2>
+                    <button id="btnAddAdmin" class="btn-success">
+                        <i class="fas fa-user-plus"></i> Adicionar Administrador
+                    </button>
+                </div>
+
+                <div class="users-table-container">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>Nível de Acesso</th>
+                                <th>Último Acesso</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="6" class="loading-cell">
+                                    Carregando administradores...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Configurações View -->
+            <div id="configuracoesView" class="content-view">
+                <div class="view-header">
+                    <h2>Configurações do Sistema</h2>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3><i class="fas fa-bell"></i> Notificações</h3>
+                        <div class="setting-item">
+                            <label class="switch">
+                                <input type="checkbox" id="notifyNewReservations" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span>Notificar novas reservas</span>
+                        </div>
+                        <div class="setting-item">
+                            <label class="switch">
+                                <input type="checkbox" id="notifyChanges" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span>Notificar alterações</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3><i class="fas fa-database"></i> Banco de Dados</h3>
+                        <div class="setting-item">
+                            <button id="btnBackup" class="btn-secondary">
+                                <i class="fas fa-download"></i> Fazer Backup
+                            </button>
+                            <button id="btnRestore" class="btn-secondary">
+                                <i class="fas fa-upload"></i> Restaurar Backup
+                            </button>
+                        </div>
+                        <div class="setting-item">
+                            <button id="btnClearOldData" class="btn-warning">
+                                <i class="fas fa-trash-alt"></i> Limpar Dados Antigos
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3><i class="fas fa-paint-brush"></i> Aparência</h3>
+                        <div class="setting-item">
+                            <label>Tema:</label>
+                            <select id="themeSelect" class="filter-select">
+                                <option value="light">Claro</option>
+                                <option value="dark">Escuro</option>
+                                <option value="auto">Automático</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-actions">
+                    <button id="btnSaveSettings" class="btn-primary">
+                        <i class="fas fa-save"></i> Salvar Configurações
+                    </button>
+                    <button id="btnResetSettings" class="btn-secondary">
+                        <i class="fas fa-undo"></i> Restaurar Padrões
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modal para editar reserva -->
+        <div id="editReservaModal" class="modal">
+            <div class="modal-content">
+                <h2>Editar Reserva</h2>
+                <form id="editReservaForm">
+                    <div class="form-group">
+                        <label for="editEmail">E-mail</label>
+                        <input type="email" id="editEmail" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editResponsavel">Responsável</label>
+                        <input type="text" id="editResponsavel" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editDias">Dias</label>
+                        <div id="editDiasContainer" class="dias-container">
+                            <!-- Dias serão gerados dinamicamente -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editTurno">Turno</label>
+                        <select id="editTurno" required>
+                            <option value="manha">Manhã</option>
+                            <option value="tarde">Tarde</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editStatus">Status</label>
+                        <select id="editStatus" required>
+                            <option value="pendente">Pendente</option>
+                            <option value="aprovado">Aprovado</option>
+                            <option value="recusado">Recusado</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editFinalidade">Finalidade</label>
+                        <textarea id="editFinalidade" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="modal-buttons">
+                        <button type="submit" class="btn-primary">Salvar Alterações</button>
+                        <button type="button" class="btn-secondary close-modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal para adicionar administrador -->
+        <div id="addAdminModal" class="modal">
+            <div class="modal-content">
+                <h2>Adicionar Administrador</h2>
+                <form id="addAdminForm">
+                    <div class="form-group">
+                        <label for="newAdminName">Nome Completo</label>
+                        <input type="text" id="newAdminName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newAdminEmail">E-mail</label>
+                        <input type="email" id="newAdminEmail" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newAdminPassword">Senha</label>
+                        <input type="password" id="newAdminPassword" required 
+                               minlength="6">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newAdminLevel">Nível de Acesso</label>
+                        <select id="newAdminLevel" required>
+                            <option value="admin">Administrador</option>
+                            <option value="superadmin">Super Administrador</option>
+                        </select>
+                    </div>
+                    
+                    <div class="modal-buttons">
+                        <button type="submit" class="btn-primary">Criar Conta</button>
+                        <button type="button" class="btn-secondary close-modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/admin-firebase.js"></script>
+    <script src="js/admin-scripts.js"></script>
+</body>
+</html>

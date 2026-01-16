@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>LEP - Reservas do Laboratório</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+<!-- Substituir esta parte no header -->
+<header class="header">
+    <div class="header-left">
+        <h1>LEP</h1>
+        <span>Reserva do Laboratório de Informática</span>
+    </div>
+    <div class="header-right">
+        <button id="btnAbrirModal">+ Nova Reserva</button>
+        <a href="login.html" class="admin-link">Área Admin</a>
+    </div>
+</header>
+
+    <main class="container">
+        <!-- CALENDÁRIO -->
+        <section class="card calendario">
+            <div class="calendario-header">
+                <div class="nav-mes">
+                    <button id="prev">&lt;</button>
+                    <span id="tituloCalendario">Janeiro 2026</span>
+                    <button id="next">&gt;</button>
+                </div>
+
+                <div class="view-buttons">
+                    <!-- ALTERADO: Mensal agora é ativo por padrão -->
+                    <button class="view-btn active" data-view="monthly">Mensal</button>
+                    <button class="view-btn" data-view="weekly">Semanal</button>
+                </div>
+            </div>
+
+            <!-- VISUALIZAÇÃO SEMANAL -->
+            <div id="weeklyView" class="view-container">
+                <div class="tabela-turnos">
+                    <div class="turno-header">
+                        <div class="hora-col">Horário</div>
+                        <div class="dia-col">Segunda</div>
+                        <div class="dia-col">Terça</div>
+                        <div class="dia-col">Quarta</div>
+                        <div class="dia-col">Quinta</div>
+                        <div class="dia-col">Sexta</div>
+                    </div>
+
+                    <div class="turno-linha">
+                        <div class="hora-col">08h às 12h</div>
+                        <div class="dia-col" data-dia="seg" data-turno="manha">Camila</div>
+                        <div class="dia-col" data-dia="ter" data-turno="manha">Camila</div>
+                        <div class="dia-col" data-dia="qua" data-turno="manha">Fernanda</div>
+                        <div class="dia-col" data-dia="qui" data-turno="manha">Maria Alice</div>
+                        <div class="dia-col" data-dia="sex" data-turno="manha">Ronald</div>
+                    </div>
+
+                    <div class="turno-linha">
+                        <div class="hora-col">14h às 17h</div>
+                        <div class="dia-col" data-dia="seg" data-turno="tarde">Marcell</div>
+                        <div class="dia-col" data-dia="ter" data-turno="tarde">Fernanda</div>
+                        <div class="dia-col" data-dia="qua" data-turno="tarde">Marcell</div>
+                        <div class="dia-col" data-dia="qui" data-turno="tarde">Maria Alice</div>
+                        <div class="dia-col" data-dia="sex" data-turno="tarde">Ronald</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VISUALIZAÇÃO MENSAL (padrão) -->
+            <!-- ALTERADO: Agora tem active-view por padrão -->
+            <div id="monthlyView" class="view-container active-view">
+                <div class="calendario-grid">
+                    <!-- Dias serão gerados pelo JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- REGRAS DO LEP -->
+        <section class="card regras">
+            <div class="regras-header">
+                <h2>REGRAS DO LEP</h2>
+                <p class="subheader">UNIVERSIDADE FEDERAL DO PARÁ</p>
+                <p class="subheader">FACULDADE DE ENGENHARIA INDUSTRIAL</p>
+            </div>
+
+            <div class="regras-grid">
+                <!-- Regra 1 -->
+                <div class="regra-item">
+                    <div class="regra-numero">1</div>
+                    <div class="regra-conteudo">
+                        <h3 class="regra-titulo">NÃO COMER, BEBER OU FUMAR</h3>
+                        <p class="regra-descricao">Evite alimentos, bebidas (Exceto água e somente em recipiente
+                            fechado/vedado) no laboratório, pois podem danificar os equipamentos e causar sujeira.
+                            Lembre-se: o equipamento é de todos que utilizam.</p>
+                    </div>
+                </div>
+
+                <!-- Regra 2 -->
+                <div class="regra-item">
+                    <div class="regra-numero">2</div>
+                    <div class="regra-conteudo">
+                        <h3 class="regra-titulo">RESPEITE OS EQUIPAMENTOS</h3>
+                        <p class="regra-descricao">Não mexa ou desconecte os cabos dos computadores sem permissão. Use
+                            os equipamentos com cuidado e siga as orientações de uso. Não coloque garrafas sobre a mesa.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Regra 3 -->
+                <div class="regra-item">
+                    <div class="regra-numero">3</div>
+                    <div class="regra-conteudo">
+                        <h3 class="regra-titulo">EVITE A INSTALAÇÃO DE SOFTWARE NÃO AUTORIZADO</h3>
+                        <p class="regra-descricao">A instalação de software não autorizado pode causar problemas de
+                            segurança e conflitos de sistema. Somente o pessoal autorizado deve instalar software nos
+                            computadores.</p>
+                    </div>
+                </div>
+
+                <!-- Regra 4 -->
+                <div class="regra-item">
+                    <div class="regra-numero">4</div>
+                    <div class="regra-conteudo">
+                        <h3 class="regra-titulo">RESPEITE AS POLÍTICAS DE USO DA INTERNET</h3>
+                        <p class="regra-descricao">Não acesse sites inapropriados. Não faça downloads ilegais de
+                            conteúdo ou realize atividades que possam comprometer a segurança da rede.</p>
+                    </div>
+                </div>
+
+                <!-- Regra 5 -->
+                <div class="regra-item">
+                    <div class="regra-numero">5</div>
+                    <div class="regra-conteudo">
+                        <h3 class="regra-titulo">MANTENHA O AMBIENTE LIMPO E ORGANIZADO</h3>
+                        <p class="regra-descricao">Deixe a área de trabalho limpa e organizada após o uso. Isso inclui:
+                            recolher lixos, papéis e outros resíduos.</p>
+                    </div>
+                </div>
+
+                <!-- Regra 6 -->
+                <div class="regra-item">
+                    <div class="regra-numero">6</div>
+                    <div class="regra-conteudo">
+                        <h3 class="regra-titulo">DESLIGUE OS COMPUTADORES CORRETAMENTE</h3>
+                        <p class="regra-descricao">Ao sair do laboratório, desligue os computadores de forma adequada.
+                            Não desligue bruscamente, pois isso pode causar danos aos sistemas de armazenamento.</p>
+                    </div>
+                </div>
+
+                <!-- Regra 7 -->
+                <div class="regra-item">
+                    <div class="regra-numero">7</div>
+                    <div class="regra-conteudo">
+                        <h3 class="regra-titulo">REPORTE PROBLEMAS</h3>
+                        <p class="regra-descricao">Se encontrar algum problema nos equipamentos ou na rede, informe
+                            imediatamente aos responsáveis pelo laboratório.</p>
+                    </div>
+                </div>
+
+                <!-- Regra 8 -->
+                <div class="regra-item">
+                    <div class="regra-numero">8</div>
+                    <div class="regra-conteudo">
+                        <h3 class="regra-titulo">RESPEITE AS REGRAS DE ACESSO E HORÁRIO</h3>
+                        <p class="regra-descricao">Cumpra os horários de funcionamento do laboratório e as regras de
+                            acesso estabelecidas pela instituição.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="coordenador">
+                <p><strong>COORDENADOR RESPONSÁVEL: DR. EDUARDO BRAGA</strong></p>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL DE RESERVA -->
+    <div class="modal" id="modalReserva">
+        <div class="modal-content">
+            <h2>Nova Reserva</h2>
+
+            <form id="formReserva">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="whatsapp">Número do WhatsApp</label>
+                <input type="tel" id="whatsapp" name="whatsapp" required placeholder="(99) 99999-9999">
+
+                <label for="responsavel">Quem será o responsável pela reserva?</label>
+                <input type="text" id="responsavel" name="responsavel" required>
+
+                <label for="finalidade">Para qual finalidade você está realizando esta reserva?</label>
+                <textarea id="finalidade" name="finalidade" rows="3" required
+                    placeholder="Exemplo: Ministrar aula de Matemática Aplicada"></textarea>
+
+                <label for="ocupacao">Qual sua ocupação na universidade?</label>
+                <select id="ocupacao" name="ocupacao" required>
+                    <option value="" disabled selected>Selecione sua ocupação</option>
+                    <option value="portugues">Docente de Português</option>
+                    <option value="espanhol">Docente de Espanhol</option>
+                    <option value="matematica">Docente de Matemática</option>
+                    <option value="pedagogia">Docente de Pedagogia</option>
+                    <option value="historia">Docente de História</option>
+                    <option value="fisica">Docente de Física</option>
+                    <option value="engenharia">Docente de Engenharia de Produção</option>
+                    <option value="posgraduacao">Docente de Pós Graduação</option>
+                </select>
+
+                <label>Dias de uso da reserva:</label>
+                <div class="dias-selecao">
+                    <div class="calendario-mini">
+                        <!-- Mini calendário para seleção de dias -->
+                        <div class="calendario-mini-header">
+                            <button type="button" class="mini-prev">&lt;</button>
+                            <span class="mini-mes">Janeiro 2026</span>
+                            <button type="button" class="mini-next">&gt;</button>
+                        </div>
+                        <div class="calendario-mini-grid">
+                            <!-- Dias serão gerados pelo JS -->
+                        </div>
+                    </div>
+                    <div class="dias-selecionados" id="diasSelecionados">
+                        Nenhum dia selecionado
+                    </div>
+                </div>
+
+                <label>Qual o turno da sua reserva?</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="turno" value="manha" required>
+                        <span>Manhã</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="turno" value="tarde" required>
+                        <span>Tarde</span>
+                    </label>
+                </div>
+
+                <label>Você está ciente e se responsabiliza pelos cumprimentos das regras e normas referentes ao uso do
+                    Laboratório de Engenharia de Produção?</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="regras" value="sim" required>
+                        <span>Sim</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="regras" value="nao" required>
+                        <span>Não</span>
+                    </label>
+                </div>
+
+                <div class="legenda-disponibilidade">
+                    <div class="item-legenda">
+                        <div class="cor-legenda cor-manha"></div>
+                        <span>Manhã ocupada</span>
+                    </div>
+                    <div class="item-legenda">
+                        <div class="cor-legenda cor-tarde"></div>
+                        <span>Tarde ocupada</span>
+                    </div>
+                    <div class="item-legenda">
+                        <div class="cor-legenda cor-indisponivel"></div>
+                        <span>Indisponível</span>
+                    </div>
+                </div>
+
+                <div class="disponibilidade-status" id="statusDisponibilidade"></div>
+
+                <div class="modal-buttons">
+                    <button type="submit">Salvar Reserva</button>
+                    <button type="button" id="btnFecharModal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        © 2026 - Laboratório de Engenharia de Produção
+    </footer>
+
+    <!-- 🔥 SCRIPTS DO FIREBASE (VERSÃO COMPATÍVEL COM NAVEGADOR) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <!-- SEU SCRIPT COM FIREBASE -->
+    <script src="js/script-firebase.js"></script>
+
+</body>
+
+</html>

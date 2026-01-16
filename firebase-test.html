@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Firebase</title>
+</head>
+<body>
+    <h1>Teste de Conexão Firebase</h1>
+    <div id="status">Testando...</div>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBsDDnW7HZaie47AgjMaZ5U1orAiLvOaDM",
+            authDomain: "lep-reservas.firebaseapp.com",
+            projectId: "lep-reservas",
+            storageBucket: "lep-reservas.firebasestorage.app",
+            messagingSenderId: "492338423428",
+            appId: "1:492338423428:web:7f72cdd8bcd4a5146f84d1"
+        };
+        
+        try {
+            console.log('Teste: Firebase disponível?', typeof firebase);
+            
+            if (typeof firebase === 'undefined') {
+                document.getElementById('status').innerHTML = '❌ Firebase SDK não carregado';
+                throw new Error('SDK não carregado');
+            }
+            
+            console.log('Inicializando Firebase...');
+            firebase.initializeApp(firebaseConfig);
+            
+            const db = firebase.firestore();
+            console.log('Firestore:', db);
+            
+            document.getElementById('status').innerHTML = '✅ Firebase inicializado com sucesso!';
+            
+            // Testar escrita
+            db.collection('test').add({
+                test: 'Conexão funcionando',
+                timestamp: new Date()
+            })
+            .then(() => {
+                document.getElementById('status').innerHTML += '<br>✅ Escrita no Firestore funcionando!';
+            })
+            .catch(error => {
+                document.getElementById('status').innerHTML += '<br>❌ Erro na escrita: ' + error.message;
+            });
+            
+        } catch (error) {
+            console.error('Erro no teste:', error);
+            document.getElementById('status').innerHTML = '❌ Erro: ' + error.message;
+        }
+    </script>
+</body>
+</html>
