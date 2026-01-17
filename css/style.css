@@ -2094,3 +2094,25 @@ footer {
     }
 }
 
+/* SOLUÇÃO RADICAL - REMOVER TODAS AS RESTRIÇÕES DE LARGURA */
+.calendario-grid,
+.calendario-grid * {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+.calendario-grid {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 2px !important;
+}
+
+.calendario-grid .dia {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 50px !important;
+}
