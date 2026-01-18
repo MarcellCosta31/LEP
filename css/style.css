@@ -798,7 +798,6 @@ footer {
 
 /* Para dias com ambos turnos ocupados - destaque especial */
 .calendario-grid .dia.ocupado-ambos .dia-numero {
-    background-color: #28a745;
     color: white;
     width: 26px;
     height: 26px;
@@ -2115,4 +2114,86 @@ footer {
     width: 100% !important;
     height: auto !important;
     min-height: 50px !important;
+}
+
+/* Estilo para checkboxes múltiplos */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.checkbox-option:hover {
+    background-color: #f9f9f9;
+    border-color: #004aad;
+}
+
+.checkbox-option input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.checkbox-option span {
+    font-size: 14px;
+    color: #333;
+}
+
+/* Quando checkbox está marcado */
+.checkbox-option input[type="checkbox"]:checked + span {
+    font-weight: bold;
+    color: #004aad;
+}
+
+/* Mensagem de erro para turnos */
+.turno-error {
+    color: #ff4444;
+    font-size: 12px;
+    margin-top: 5px;
+    display: none;
+}
+
+/* Adicione ao seu CSS existente */
+.dia-mini.selecionado-manha {
+    background-color: rgba(0, 74, 173, 0.2);
+    border: 2px solid rgba(0, 74, 173, 0.5);
+}
+
+.dia-mini.selecionado-tarde {
+    background-color: rgba(255, 165, 0, 0.2);
+    border: 2px solid rgba(255, 165, 0, 0.5);
+}
+
+.dia-mini.selecionado-ambos {
+    background: linear-gradient(135deg, rgba(0, 74, 173, 0.3) 50%, rgba(255, 165, 0, 0.3) 50%);
+    border: 2px solid rgba(0, 74, 173, 0.5);
+}
+
+/* Para visualização no calendário principal */
+.ocupado-manha {
+    background-color: rgba(0, 74, 173, 0.1) !important;
+    border-left: 4px solid #004aad !important;
+}
+
+.ocupado-tarde {
+    background-color: rgba(255, 165, 0, 0.1) !important;
+    border-left: 4px solid #ffa500 !important;
+}
+
+.ocupado-ambos {
+    background: linear-gradient(135deg, rgba(0, 74, 173, 0.1) 50%, rgba(255, 165, 0, 0.1) 50%) !important;
+    border-left: 4px solid #004aad !important;
+    border-right: 4px solid #ffa500 !important;
 }

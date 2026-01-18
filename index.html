@@ -9,17 +9,17 @@
 </head>
 
 <body>
-<!-- Substituir esta parte no header -->
-<header class="header">
-    <div class="header-left">
-        <h1>LEP</h1>
-        <span>Reserva do Laboratório de Informática</span>
-    </div>
-    <div class="header-right">
-        <button id="btnAbrirModal">+ Nova Reserva</button>
-        <a href="login.html" class="admin-link">Área Admin</a>
-    </div>
-</header>
+    <!-- Substituir esta parte no header -->
+    <header class="header">
+        <div class="header-left">
+            <h1>LEP</h1>
+            <span>Reserva do Laboratório de Informática</span>
+        </div>
+        <div class="header-right">
+            <button id="btnAbrirModal">+ Nova Reserva</button>
+            <a href="login.html" class="admin-link">Área Admin</a>
+        </div>
+    </header>
 
     <main class="container">
         <!-- CALENDÁRIO -->
@@ -190,7 +190,7 @@
                 <label for="whatsapp">Número do WhatsApp</label>
                 <input type="tel" id="whatsapp" name="whatsapp" required placeholder="(99) 99999-9999">
 
-                <label for="responsavel">Quem será o responsável pela reserva?</label>
+                <label for="responsavel">Quem será o responsável pela reserva?Nome Completo</label>
                 <input type="text" id="responsavel" name="responsavel" required>
 
                 <label for="finalidade">Para qual finalidade você está realizando esta reserva?</label>
@@ -208,6 +208,7 @@
                     <option value="fisica">Docente de Física</option>
                     <option value="engenharia">Docente de Engenharia de Produção</option>
                     <option value="posgraduacao">Docente de Pós Graduação</option>
+                    <option value="estudante">Discente de Engenharia de Produção</option>
                 </select>
 
                 <label>Dias de uso da reserva:</label>
@@ -228,18 +229,18 @@
                     </div>
                 </div>
 
-                <label>Qual o turno da sua reserva?</label>
-                <div class="radio-group">
-                    <label class="radio-option">
-                        <input type="radio" name="turno" value="manha" required>
+                <!-- Substitua a parte do formulário com os turnos por: -->
+                <label>Qual(is) turno(s) da sua reserva?</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="turno" value="manha" class="turno-checkbox">
                         <span>Manhã</span>
                     </label>
-                    <label class="radio-option">
-                        <input type="radio" name="turno" value="tarde" required>
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="turno" value="tarde" class="turno-checkbox">
                         <span>Tarde</span>
                     </label>
                 </div>
-
                 <label>Você está ciente e se responsabiliza pelos cumprimentos das regras e normas referentes ao uso do
                     Laboratório de Engenharia de Produção?</label>
                 <div class="radio-group">

@@ -1,8 +1,8 @@
 // admin-scripts.js - Lógica principal do painel administrativo
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     if (!document.querySelector('.admin-container')) return;
-    
+
     // Inicializar componentes
     setupNavigation();
     setupDashboard();
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupUsuarios();
     setupConfiguracoes();
     setupModals();
-    
+
     // Carregar dados iniciais
     loadInitialData();
 });
@@ -21,21 +21,21 @@ function setupNavigation() {
     const navItems = document.querySelectorAll('.nav-item');
     const contentViews = document.querySelectorAll('.content-view');
     const pageTitle = document.getElementById('pageTitle');
-    
+
     navItems.forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
             e.preventDefault();
-            
+
             const viewName = this.getAttribute('data-view');
-            
+
             // Atualizar navegação ativa
             navItems.forEach(nav => nav.classList.remove('active'));
             this.classList.add('active');
-            
+
             // Mostrar view correspondente
             contentViews.forEach(view => {
                 view.classList.remove('active-view');
-                if (view.id === `${viewName}View') {
+                if (view.id === `${viewName}View`) {
                     view.classList.add('active-view');
                 }
             });
@@ -75,57 +75,103 @@ function setupNavigation() {
 function setupDashboard() {
     // Configurar atualização periódica
     setInterval(loadDashboardData, 30000); // Atualizar a cada 30 segundos
+    
+    // Inicializar gráfico
+    setTimeout(() => {
+        const chartElement = document.getElementById('dashboardChart');
+        if (chartElement) {
+            // O gráfico será criado quando os dados forem carregados
+            loadDashboardData();
+        }
+    }, 1000);
 }
 
 async function loadDashboardData() {
     try {
-        // Carregar estatísticas
-        const [reservas, admins] = await Promise.all([
-            adminFirebase.getAllReservas({ limit: 1000 }),
-            adminFirebase.db.collection('admins').get()
-        ]);
+        // Carregar todas as reservas
+        const reservas = await adminFirebase.getAllReservas();
+        
+        // Carregar reservas recentes (últimos 7 dias)
+        const hoje = new Date();
+        const seteDiasAtras = new Date();
+        seteDiasAtras.setDate(hoje.getDate() - 7);
+        
+        const reservasRecentes = reservas.filter(r => 
+            r.criadoEm && r.criadoEm >= seteDiasAtras
+        );
         
         // Calcular estatísticas
         const totalReservas = reservas.length;
         const aprovadas = reservas.filter(r => r.status === 'aprovado').length;
         const pendentes = reservas.filter(r => r.status === 'pendente').length;
-        const totalAdmins = admins.size;
+        const recusadas = reservas.filter(r => r.status === 'recusado').length;
         
-        // Atualizar interface
-        updateStatElement('totalReservas', totalReservas);
+        // Atualizar interface - TOTAL DE RESERVAS
+        const totalElement = document.getElementById('totalReservas');
+        if (totalElement) {
+            animateCounter(totalElement, totalReservas);
+        }
+        
+        // Atualizar outras estatísticas (se os elementos existirem)
         updateStatElement('reservasAprovadas', aprovadas);
         updateStatElement('reservasPendentes', pendentes);
-        updateStatElement('totalUsuarios', totalAdmins);
+        updateStatElement('reservasRecusadas', recusadas);
+        updateStatElement('reservasEstaSemana', reservasRecentes.length);
         
-        // Calcular percentual
+        // Calcular percentual de aprovação
         const percentAprovadas = totalReservas > 0 ? 
             Math.round((aprovadas / totalReservas) * 100) : 0;
-        updateStatElement('aprovadasPercent', `${percentAprovadas}% do total`);
         
-        // Atualizar tendência (últimos 7 dias)
-        const lastWeekReservas = reservas.filter(r => {
-            if (!r.criadoEm) return false;
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-            return r.criadoEm >= sevenDaysAgo;
-        });
+        const aprovadasPercent = document.getElementById('aprovadasPercent');
+        if (aprovadasPercent) {
+            aprovadasPercent.textContent = `${percentAprovadas}% do total`;
+        }
         
-        const lastWeekCount = lastWeekReservas.length;
-        const prevWeekCount = Math.max(0, totalReservas - lastWeekCount);
-        const trend = prevWeekCount > 0 ? 
-            Math.round(((lastWeekCount - prevWeekCount) / prevWeekCount) * 100) : 100;
+        // Atualizar tendência (comparar com a semana anterior)
+        const duasSemanasAtras = new Date();
+        duasSemanasAtras.setDate(hoje.getDate() - 14);
+        
+        const reservasSemanaAnterior = reservas.filter(r => 
+            r.criadoEm && 
+            r.criadoEm >= duasSemanasAtras && 
+            r.criadoEm < seteDiasAtras
+        );
         
         const trendElement = document.getElementById('reservasTrend');
         if (trendElement) {
-            const trendText = trend >= 0 ? 
-                `↑ ${trend}% em relação à semana anterior` :
-                `↓ ${Math.abs(trend)}% em relação à semana anterior`;
+            const semanaAnterior = reservasSemanaAnterior.length;
+            const estaSemana = reservasRecentes.length;
+            
+            let trendText = '';
+            let trendColor = '#28a745';
+            
+            if (semanaAnterior > 0) {
+                const diff = estaSemana - semanaAnterior;
+                const percentDiff = Math.round((diff / semanaAnterior) * 100);
+                
+                if (diff > 0) {
+                    trendText = `↑ ${percentDiff}% em relação à semana anterior`;
+                    trendColor = '#28a745';
+                } else if (diff < 0) {
+                    trendText = `↓ ${Math.abs(percentDiff)}% em relação à semana anterior`;
+                    trendColor = '#dc3545';
+                } else {
+                    trendText = '⇄ Igual à semana anterior';
+                    trendColor = '#ffc107';
+                }
+            } else {
+                trendText = estaSemana > 0 ? '↑ Primeiros dados esta semana' : 'Sem dados nas últimas semanas';
+            }
+            
             trendElement.textContent = trendText;
-            trendElement.style.color = trend >= 0 ? '#28a745' : '#dc3545';
+            trendElement.style.color = trendColor;
         }
         
-        // Carregar atividade recente
-        loadRecentActivity(reservas);
+        // Carregar atividade recente (últimas 10 reservas)
+        loadRecentActivity(reservasRecentes.slice(0, 10));
+        
+        // Atualizar gráfico se existir
+        updateDashboardChart(reservasRecentes);
         
     } catch (error) {
         console.error('Erro ao carregar dados do dashboard:', error);
@@ -162,6 +208,73 @@ function animateCounter(element, target) {
     }, speed);
 }
 
+function updateDashboardChart(reservasRecentes) {
+    const chartElement = document.getElementById('dashboardChart');
+    if (!chartElement) return;
+    
+    // Agrupar reservas por dia
+    const reservasPorDia = {};
+    const hoje = new Date();
+    
+    // Inicializar últimos 7 dias
+    for (let i = 6; i >= 0; i--) {
+        const dia = new Date();
+        dia.setDate(hoje.getDate() - i);
+        const diaStr = dia.toLocaleDateString('pt-BR', { weekday: 'short' });
+        reservasPorDia[diaStr] = 0;
+    }
+    
+    // Contar reservas por dia
+    reservasRecentes.forEach(reserva => {
+        if (reserva.criadoEm) {
+            const diaStr = reserva.criadoEm.toLocaleDateString('pt-BR', { weekday: 'short' });
+            if (reservasPorDia[diaStr] !== undefined) {
+                reservasPorDia[diaStr]++;
+            }
+        }
+    });
+    
+    // Criar ou atualizar gráfico
+    if (!window.dashboardChart) {
+        const ctx = chartElement.getContext('2d');
+        window.dashboardChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Object.keys(reservasPorDia),
+                datasets: [{
+                    label: 'Reservas',
+                    data: Object.values(reservasPorDia),
+                    borderColor: '#004aad',
+                    backgroundColor: 'rgba(0, 74, 173, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    } else {
+        window.dashboardChart.data.labels = Object.keys(reservasPorDia);
+        window.dashboardChart.data.datasets[0].data = Object.values(reservasPorDia);
+        window.dashboardChart.update();
+    }
+}
+
 function loadRecentActivity(reservas) {
     const activityList = document.getElementById('recentActivity');
     if (!activityList) return;
@@ -174,7 +287,15 @@ function loadRecentActivity(reservas) {
     activityList.innerHTML = '';
     
     if (recentReservas.length === 0) {
-        activityList.innerHTML = '<div class="activity-item">Nenhuma atividade recente</div>';
+        activityList.innerHTML = `
+            <div class="activity-item">
+                <div class="activity-icon">📭</div>
+                <div class="activity-content">
+                    Nenhuma atividade recente
+                    <div class="activity-time">Sem reservas nos últimos dias</div>
+                </div>
+            </div>
+        `;
         return;
     }
     
@@ -184,17 +305,28 @@ function loadRecentActivity(reservas) {
         
         const timeAgo = getTimeAgo(reserva.criadoEm);
         const statusIcon = getStatusIcon(reserva.status);
+        const statusClass = getStatusClass(reserva.status);
         
         activityItem.innerHTML = `
-            <div class="activity-icon">${statusIcon}</div>
+            <div class="activity-icon ${statusClass}">${statusIcon}</div>
             <div class="activity-content">
-                <strong>${reserva.responsavel}</strong> ${getActivityText(reserva)}
+                <strong>${reserva.responsavel || 'Usuário'}</strong>
+                <div>${getActivityText(reserva)}</div>
                 <div class="activity-time">${timeAgo}</div>
             </div>
         `;
         
         activityList.appendChild(activityItem);
     });
+}
+
+function getStatusClass(status) {
+    const classes = {
+        aprovado: 'status-aprovado',
+        pendente: 'status-pendente',
+        recusado: 'status-recusado'
+    };
+    return classes[status] || '';
 }
 
 function getTimeAgo(date) {
@@ -207,31 +339,34 @@ function getTimeAgo(date) {
     const diffDays = Math.floor(diffMs / 86400000);
     
     if (diffMins < 1) return 'Agora mesmo';
-    if (diffMins < 60) return `Há ${diffMins} min`;
-    if (diffHours < 24) return `Há ${diffHours} h`;
+    if (diffMins < 60) return `Há ${ diffMins } min`;
+    if (diffHours < 24) return `Há ${ diffHours } h`;
     if (diffDays === 1) return 'Ontem';
-    if (diffDays < 7) return `Há ${diffDays} dias`;
+    if (diffDays < 7) return `Há ${ diffDays } dias`;
     
     return date.toLocaleDateString('pt-BR');
 }
 
 function getStatusIcon(status) {
     const icons = {
-        aprovado: '✅',
+        aprovado: '✓',
         pendente: '⏳',
-        recusado: '❌'
+        recusado: '✗'
     };
     return icons[status] || '📝';
 }
 
 function getActivityText(reserva) {
+    const diasCount = reserva.dias ? reserva.dias.length : 0;
+    const turnoText = reserva.turno === 'manha' ? 'manhã' : 'tarde';
+    
     switch (reserva.status) {
         case 'aprovado':
-            return `reservou ${reserva.dias ? reserva.dias.length : 0} dias para ${reserva.turno === 'manha' ? 'manhã' : 'tarde'}`;
+            return `reservou ${diasCount} dias para ${turnoText}`;
         case 'pendente':
-            return `solicitou reserva para ${reserva.dias ? reserva.dias.length : 0} dias`;
+            return `solicitou ${diasCount} dias para ${turnoText}`;
         case 'recusado':
-            return `teve reserva recusada`;
+            return `reserva recusada para ${turnoText}`;
         default:
             return 'fez uma reserva';
     }
@@ -306,7 +441,7 @@ function setupReservas() {
             
             if (!action || reservaIds.length === 0) return;
             
-            if (confirm(`Deseja realmente ${getBulkActionText(action)} ${reservaIds.length} reserva(s)?`)) {
+            if (confirm(`Deseja realmente ${ getBulkActionText(action) } ${ reservaIds.length } reserva(s) ? `)) {
                 try {
                     switch (action) {
                         case 'approve':
@@ -320,7 +455,7 @@ function setupReservas() {
                             break;
                     }
                     
-                    showNotification(`${reservaIds.length} reserva(s) ${getBulkActionDoneText(action)}`, 'sucesso');
+                    showNotification(`${ reservaIds.length } reserva(s) ${ getBulkActionDoneText(action) } `, 'sucesso');
                     loadReservasData();
                     
                     // Resetar seleção
@@ -423,7 +558,7 @@ function renderReservasTable() {
     
     // Atualizar informações da página
     if (pageInfo) {
-        pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+        pageInfo.textContent = `Página ${ currentPage } de ${ totalPages } `;
     }
     
     if (prevPageBtn) {
@@ -549,7 +684,7 @@ function getDiasPreview(dias) {
         return dias.join(', ');
     }
     
-    return `${dias.slice(0, 3).join(', ')}...`;
+    return `${ dias.slice(0, 3).join(', ') }...`;
 }
 
 function getStatusText(status) {
@@ -929,15 +1064,15 @@ function generateReportTable(report, format) {
 function generateReportSummary(report) {
     const summary = document.getElementById('reportSummary');
     if (!summary) return;
-    
+
     let html = '<div class="report-summary-content">';
     html += `<h3>Resumo do Relatório</h3>`;
     html += `<p><strong>Título:</strong> ${report.titulo}</p>`;
-    
+
     if (report.totalReservas !== undefined) {
         html += `<p><strong>Total de Reservas:</strong> ${report.totalReservas}</p>`;
     }
-    
+
     if (report.periodo) {
         html += `<p><strong>Período:</strong> `;
         if (report.periodo.inicio) {
@@ -948,7 +1083,7 @@ function generateReportSummary(report) {
         }
         html += `</p>`;
     }
-    
+
     html += `</div>`;
     summary.innerHTML = html;
 }
@@ -970,38 +1105,38 @@ function getMimeType(format) {
 // Usuários (Administradores)
 function setupUsuarios() {
     const addAdminBtn = document.getElementById('btnAddAdmin');
-    
+
     if (addAdminBtn) {
-        addAdminBtn.addEventListener('click', function() {
+        addAdminBtn.addEventListener('click', function () {
             const modal = document.getElementById('addAdminModal');
             modal.style.display = 'flex';
         });
     }
-    
+
     // Configurar formulário de adição de admin
     const addAdminForm = document.getElementById('addAdminForm');
     if (addAdminForm) {
-        addAdminForm.addEventListener('submit', async function(e) {
+        addAdminForm.addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             const adminData = {
                 nome: document.getElementById('newAdminName').value,
                 email: document.getElementById('newAdminEmail').value,
                 password: document.getElementById('newAdminPassword').value,
                 nivel: document.getElementById('newAdminLevel').value
             };
-            
+
             try {
                 await adminFirebase.addAdmin(adminData);
-                
+
                 // Fechar modal e limpar formulário
                 const modal = document.getElementById('addAdminModal');
                 modal.style.display = 'none';
                 addAdminForm.reset();
-                
+
                 showNotification('Administrador adicionado com sucesso', 'sucesso');
                 loadUsuariosData();
-                
+
             } catch (error) {
                 console.error('Erro ao adicionar administrador:', error);
                 showNotification(`Erro: ${error.message}`, 'erro');
@@ -1014,11 +1149,11 @@ async function loadUsuariosData() {
     try {
         const snapshot = await adminFirebase.db.collection('admins').get();
         const tableBody = document.getElementById('usersTableBody');
-        
+
         if (!tableBody) return;
-        
+
         tableBody.innerHTML = '';
-        
+
         if (snapshot.empty) {
             tableBody.innerHTML = `
                 <tr>
@@ -1029,13 +1164,13 @@ async function loadUsuariosData() {
             `;
             return;
         }
-        
+
         const currentAdminId = adminFirebase.getCurrentAdmin().uid;
-        
+
         snapshot.forEach(doc => {
             const admin = doc.data();
             const isCurrentUser = doc.id === currentAdminId;
-            
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${admin.nome || ''}</td>
@@ -1066,25 +1201,25 @@ async function loadUsuariosData() {
                     </div>
                 </td>
             `;
-            
+
             tableBody.appendChild(row);
         });
-        
+
         // Adicionar event listeners
         document.querySelectorAll('.btn-edit').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const adminId = this.getAttribute('data-id');
                 editAdmin(adminId);
             });
         });
-        
+
         document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const adminId = this.getAttribute('data-id');
                 deleteAdmin(adminId);
             });
         });
-        
+
     } catch (error) {
         console.error('Erro ao carregar administradores:', error);
         showNotification('Erro ao carregar administradores', 'erro');
@@ -1116,43 +1251,43 @@ function setupConfiguracoes() {
     const backupBtn = document.getElementById('btnBackup');
     const restoreBtn = document.getElementById('btnRestore');
     const clearOldDataBtn = document.getElementById('btnClearOldData');
-    
+
     if (saveSettingsBtn) {
         saveSettingsBtn.addEventListener('click', saveSettings);
     }
-    
+
     if (resetSettingsBtn) {
         resetSettingsBtn.addEventListener('click', resetSettings);
     }
-    
+
     if (backupBtn) {
         backupBtn.addEventListener('click', backupData);
     }
-    
+
     if (restoreBtn) {
         restoreBtn.addEventListener('click', restoreData);
     }
-    
+
     if (clearOldDataBtn) {
         clearOldDataBtn.addEventListener('click', clearOldData);
     }
-    
+
     // Carregar configurações salvas
     loadSettings();
 }
 
 function loadSettings() {
     const settings = JSON.parse(localStorage.getItem('lep_admin_settings') || '{}');
-    
+
     // Aplicar configurações
     if (settings.notifyNewReservations !== undefined) {
         document.getElementById('notifyNewReservations').checked = settings.notifyNewReservations;
     }
-    
+
     if (settings.notifyChanges !== undefined) {
         document.getElementById('notifyChanges').checked = settings.notifyChanges;
     }
-    
+
     if (settings.theme) {
         document.getElementById('themeSelect').value = settings.theme;
         applyTheme(settings.theme);
@@ -1165,10 +1300,10 @@ function saveSettings() {
         notifyChanges: document.getElementById('notifyChanges').checked,
         theme: document.getElementById('themeSelect').value
     };
-    
+
     localStorage.setItem('lep_admin_settings', JSON.stringify(settings));
     applyTheme(settings.theme);
-    
+
     showNotification('Configurações salvas com sucesso', 'sucesso');
 }
 
@@ -1193,11 +1328,11 @@ async function backupData() {
     try {
         const backup = await adminFirebase.backupData();
         const backupStr = JSON.stringify(backup, null, 2);
-        
+
         downloadFile(backupStr, `backup_lep_${new Date().toISOString().split('T')[0]}.json`, 'application/json');
-        
+
         showNotification('Backup criado com sucesso', 'sucesso');
-        
+
     } catch (error) {
         console.error('Erro ao criar backup:', error);
         showNotification('Erro ao criar backup', 'erro');
@@ -1208,52 +1343,52 @@ async function restoreData() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
-    
-    input.onchange = async function(e) {
+
+    input.onchange = async function (e) {
         const file = e.target.files[0];
-        
+
         if (!file) return;
-        
+
         if (confirm('ATENÇÃO: Esta ação substituirá todos os dados atuais. Deseja continuar?')) {
             try {
                 const reader = new FileReader();
-                
-                reader.onload = async function(event) {
+
+                reader.onload = async function (event) {
                     try {
                         const backupData = JSON.parse(event.target.result);
                         await adminFirebase.restoreData(backupData);
-                        
+
                         showNotification('Dados restaurados com sucesso', 'sucesso');
                         location.reload();
-                        
+
                     } catch (error) {
                         console.error('Erro ao restaurar dados:', error);
                         showNotification('Arquivo de backup inválido', 'erro');
                     }
                 };
-                
+
                 reader.readAsText(file);
-                
+
             } catch (error) {
                 console.error('Erro ao processar arquivo:', error);
                 showNotification('Erro ao processar arquivo', 'erro');
             }
         }
     };
-    
+
     input.click();
 }
 
 async function clearOldData() {
     const days = prompt('Excluir reservas mais antigas que quantos dias?', '90');
-    
+
     if (days && !isNaN(days) && parseInt(days) > 0) {
         if (confirm(`Deseja excluir reservas com mais de ${days} dias?\nEsta ação não pode ser desfeita.`)) {
             try {
                 const count = await adminFirebase.clearOldData(parseInt(days));
                 showNotification(`${count} reservas antigas excluídas`, 'sucesso');
                 loadDashboardData();
-                
+
             } catch (error) {
                 console.error('Erro ao limpar dados antigos:', error);
                 showNotification('Erro ao limpar dados antigos', 'erro');
@@ -1266,25 +1401,25 @@ async function clearOldData() {
 function setupModals() {
     // Fechar modais ao clicar fora
     document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', function(e) {
+        modal.addEventListener('click', function (e) {
             if (e.target === this) {
                 this.style.display = 'none';
             }
         });
     });
-    
+
     // Botões de fechar modal
     document.querySelectorAll('.close-modal').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const modal = this.closest('.modal');
             if (modal) {
                 modal.style.display = 'none';
             }
         });
     });
-    
+
     // Fechar com ESC
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.style.display = 'none';
@@ -1297,14 +1432,14 @@ function setupModals() {
 function downloadFile(content, fileName, mimeType) {
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
-    
+
     const a = document.createElement('a');
     a.href = url;
     a.download = fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    
+
     URL.revokeObjectURL(url);
 }
 
@@ -1314,12 +1449,12 @@ function showNotification(message, type = 'info') {
     if (existing) {
         existing.remove();
     }
-    
+
     // Criar notificação
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
-    
+
     // Estilos
     notification.style.cssText = `
         position: fixed;
@@ -1327,23 +1462,23 @@ function showNotification(message, type = 'info') {
         right: 20px;
         padding: 15px 20px;
         border-radius: var(--radius);
-        background-color: ${type === 'sucesso' ? '#d4edda' : 
-                         type === 'erro' ? '#f8d7da' : 
-                         type === 'alerta' ? '#fff3cd' : '#d1ecf1'};
-        color: ${type === 'sucesso' ? '#155724' : 
-                type === 'erro' ? '#721c24' : 
+        background-color: ${type === 'sucesso' ? '#d4edda' :
+            type === 'erro' ? '#f8d7da' :
+                type === 'alerta' ? '#fff3cd' : '#d1ecf1'};
+        color: ${type === 'sucesso' ? '#155724' :
+            type === 'erro' ? '#721c24' :
                 type === 'alerta' ? '#856404' : '#0c5460'};
-        border: 1px solid ${type === 'sucesso' ? '#c3e6cb' : 
-                          type === 'erro' ? '#f5c6cb' : 
-                          type === 'alerta' ? '#ffeaa7' : '#bee5eb'};
+        border: 1px solid ${type === 'sucesso' ? '#c3e6cb' :
+            type === 'erro' ? '#f5c6cb' :
+                type === 'alerta' ? '#ffeaa7' : '#bee5eb'};
         z-index: 10000;
         box-shadow: var(--shadow);
         max-width: 300px;
         animation: slideIn 0.3s ease-out;
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     // Remover após 5 segundos
     setTimeout(() => {
         if (notification.parentNode) {
@@ -1356,75 +1491,6 @@ function showNotification(message, type = 'info') {
         }
     }, 5000);
 }
-
-// Adicionar animações CSS
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-    
-    .activity-item {
-        display: flex;
-        gap: 15px;
-        padding: 15px;
-        border-bottom: 1px solid var(--border-color);
-    }
-    
-    .activity-item:last-child {
-        border-bottom: none;
-    }
-    
-    .activity-icon {
-        font-size: 1.2rem;
-    }
-    
-    .activity-content {
-        flex: 1;
-    }
-    
-    .activity-time {
-        font-size: 0.8rem;
-        color: var(--secondary-color);
-        margin-top: 5px;
-    }
-    
-    .report-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-    
-    .report-table th,
-    .report-table td {
-        border: 1px solid var(--border-color);
-        padding: 10px;
-        text-align: left;
-    }
-    
-    .report-table th {
-        background-color: #f8f9fa;
-    }
-`;
-document.head.appendChild(style);
 
 // Carregar dados iniciais
 async function loadInitialData() {
@@ -1441,7 +1507,7 @@ function setupRealTimeUpdates() {
                 if (change.type === 'added') {
                     const reserva = change.doc.data();
                     showNotification(`Nova reserva de ${reserva.responsavel}`, 'info');
-                    
+
                     // Marcar como visualizado
                     change.doc.ref.update({ visualizado: true });
                 }

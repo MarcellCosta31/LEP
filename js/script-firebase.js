@@ -1,4 +1,4 @@
-// script-firebase.js - Com verificação de disponibilidade e correção de fuso horário
+// script-firebase.js - Com verificação de disponibilidade, correção de fuso horário e múltiplos turnos
 
 // 🔥 CONFIGURAÇÃO DO FIREBASE
 const firebaseConfig = {
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ESTADO
     let dataAtual = new Date();
-    let viewAtual = 'weekly';
+    let viewAtual = 'monthly'; // Alterado para mensal por padrão
     let miniDataAtual = new Date();
     let diasSelecionados = [];
     let reservasExistentes = [];
@@ -156,6 +156,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             e.target.value = value;
         });
+    }
+    
+    // FUNÇÃO PARA OBTER OS TURNOS SELECIONADOS
+    function obterTurnosSelecionados() {
+        const checkboxes = document.querySelectorAll('.turno-checkbox:checked');
+        const turnos = Array.from(checkboxes).map(cb => cb.value);
+        return turnos;
     }
     
     // MODAL FUNCTIONS
@@ -239,14 +246,40 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Verificar se já está selecionado
             if (diasSelecionados.includes(dataStr)) {
-                div.classList.add('selecionado');
+                const turnosSelecionados = obterTurnosSelecionados();
+                if (turnosSelecionados.length === 2) {
+                    div.classList.add('selecionado-ambos');
+                } else if (turnosSelecionados.includes('manha')) {
+                    div.classList.add('selecionado-manha');
+                } else if (turnosSelecionados.includes('tarde')) {
+                    div.classList.add('selecionado-tarde');
+                } else {
+                    div.classList.add('selecionado');
+                }
             }
             
-            // Verificar disponibilidade
-            const disponibilidade = verificarDisponibilidadeDia(dataStr);
-            if (!disponibilidade.disponivel) {
-                div.classList.add('indisponivel');
-                div.title = `Já reservado no turno da ${disponibilidade.turno === 'manha' ? 'manhã' : 'tarde'}`;
+            // Verificar disponibilidade para os turnos selecionados
+            const turnosSelecionados = obterTurnosSelecionados();
+            if (turnosSelecionados.length > 0) {
+                let disponivelParaTodosTurnos = true;
+                let turnoIndisponivel = null;
+                
+                for (const turno of turnosSelecionados) {
+                    const disponibilidade = verificarDisponibilidadeDiaParaTurno(dataStr, turno);
+                    if (!disponibilidade.disponivel) {
+                        disponivelParaTodosTurnos = false;
+                        turnoIndisponivel = turno;
+                        break;
+                    }
+                }
+                
+                if (!disponivelParaTodosTurnos && turnoIndisponivel) {
+                    div.classList.add('indisponivel');
+                    div.title = `Já reservado no turno da ${turnoIndisponivel === 'manha' ? 'manhã' : 'tarde'}`;
+                } else if (turnosSelecionados.length > 0) {
+                    div.classList.remove('indisponivel');
+                    div.title = 'Disponível para os turnos selecionados';
+                }
             }
             
             // Clique no dia
@@ -260,10 +293,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (index === -1) {
                     diasSelecionados.push(dataStr);
-                    this.classList.add('selecionado');
+                    // Adicionar classe baseada nos turnos selecionados
+                    const turnosSelecionados = obterTurnosSelecionados();
+                    if (turnosSelecionados.length === 2) {
+                        this.classList.add('selecionado-ambos');
+                    } else if (turnosSelecionados.includes('manha')) {
+                        this.classList.add('selecionado-manha');
+                    } else if (turnosSelecionados.includes('tarde')) {
+                        this.classList.add('selecionado-tarde');
+                    } else {
+                        this.classList.add('selecionado');
+                    }
                 } else {
                     diasSelecionados.splice(index, 1);
-                    this.classList.remove('selecionado');
+                    this.classList.remove('selecionado', 'selecionado-manha', 'selecionado-tarde', 'selecionado-ambos');
                 }
                 
                 atualizarDiasSelecionados();
@@ -302,11 +345,33 @@ document.addEventListener('DOMContentLoaded', function() {
             diaTag.className = 'dia-tag';
             diaTag.textContent = data.toLocaleDateString('pt-BR');
             
-            // Verificar disponibilidade
-            const disponibilidade = verificarDisponibilidadeDia(dataStr);
-            if (!disponibilidade.disponivel) {
-                diaTag.classList.add('indisponivel-tag');
-                diaTag.title = `Já reservado no turno da ${disponibilidade.turno === 'manha' ? 'manhã' : 'tarde'}`;
+            // Verificar disponibilidade para todos os turnos selecionados
+            const turnosSelecionados = obterTurnosSelecionados();
+            let indisponivel = false;
+            
+            if (turnosSelecionados.length > 0) {
+                for (const turno of turnosSelecionados) {
+                    const disponibilidade = verificarDisponibilidadeDiaParaTurno(dataStr, turno);
+                    if (!disponibilidade.disponivel) {
+                        indisponivel = true;
+                        diaTag.classList.add('indisponivel-tag');
+                        diaTag.title = `Já reservado no turno da ${disponibilidade.turno === 'manha' ? 'manhã' : 'tarde'}`;
+                        break;
+                    }
+                }
+            }
+            
+            // Adicionar ícone de turno se disponível
+            if (!indisponivel && turnosSelecionados.length > 0) {
+                const turnoIcon = document.createElement('span');
+                turnoIcon.className = 'turno-icon';
+                turnoIcon.textContent = turnosSelecionados.length === 2 ? ' (Manhã+Tarde)' : 
+                                      turnosSelecionados.includes('manha') ? ' (Manhã)' : ' (Tarde)';
+                turnoIcon.style.marginLeft = '3px';
+                turnoIcon.style.fontSize = '0.9em';
+                turnoIcon.style.color = turnosSelecionados.length === 2 ? '#004aad' : 
+                                      turnosSelecionados.includes('manha') ? '#004aad' : '#ffa500';
+                diaTag.appendChild(turnoIcon);
             }
             
             // Botão de remover
@@ -334,8 +399,8 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Dias selecionados:', diasSelecionados);
     }
     
-    // VERIFICAR DISPONIBILIDADE DE UM DIA ESPECÍFICO
-    function verificarDisponibilidadeDia(dataStr) {
+    // VERIFICAR DISPONIBILIDADE DE UM DIA PARA UM TURNO ESPECÍFICO
+    function verificarDisponibilidadeDiaParaTurno(dataStr, turno) {
         const hoje = new Date();
         const dataDia = parseDataStringLocal(dataStr);
         
@@ -363,17 +428,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     return formatarDataLocalParaString(dataUTC);
                 });
                 
-                if (diasReservaLocal.includes(dataStr)) {
-                    // Verificar turno selecionado
-                    const turnoSelecionado = document.querySelector('input[name="turno"]:checked');
-                    if (turnoSelecionado && turnoSelecionado.value === reserva.turno) {
-                        return { 
-                            disponivel: false, 
-                            turno: reserva.turno,
-                            motivo: `Já reservado no turno da ${reserva.turno === 'manha' ? 'manhã' : 'tarde'}`,
-                            responsavel: reserva.responsavel
-                        };
-                    }
+                if (diasReservaLocal.includes(dataStr) && reserva.turno === turno) {
+                    return { 
+                        disponivel: false, 
+                        turno: reserva.turno,
+                        motivo: `Já reservado no turno da ${reserva.turno === 'manha' ? 'manhã' : 'tarde'}`,
+                        responsavel: reserva.responsavel
+                    };
                 }
             }
         }
@@ -383,22 +444,30 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // VERIFICAR DISPONIBILIDADE DE TODOS OS DIAS SELECIONADOS
     function verificarDisponibilidadeDiasSelecionados() {
-        if (!diasSelecionados.length) return;
+        if (!diasSelecionados.length) return true;
         
-        const turnoSelecionado = document.querySelector('input[name="turno"]:checked');
-        if (!turnoSelecionado) return;
+        const turnosSelecionados = obterTurnosSelecionados();
+        
+        // Validar que pelo menos um turno foi selecionado
+        if (turnosSelecionados.length === 0) {
+            return true; // Retorna true, a validação principal vai mostrar erro
+        }
         
         const diasIndisponiveis = [];
         
         diasSelecionados.forEach(dataStr => {
-            const disponibilidade = verificarDisponibilidadeDia(dataStr);
-            if (!disponibilidade.disponivel) {
-                diasIndisponiveis.push({
-                    data: dataStr,
-                    motivo: disponibilidade.motivo,
-                    turno: disponibilidade.turno,
-                    responsavel: disponibilidade.responsavel
-                });
+            // Verificar para cada turno selecionado
+            for (const turno of turnosSelecionados) {
+                const disponibilidade = verificarDisponibilidadeDiaParaTurno(dataStr, turno);
+                if (!disponibilidade.disponivel) {
+                    diasIndisponiveis.push({
+                        data: dataStr,
+                        motivo: disponibilidade.motivo,
+                        turno: disponibilidade.turno,
+                        responsavel: disponibilidade.responsavel
+                    });
+                    break; // Se um turno está indisponível, já adiciona
+                }
             }
         });
         
@@ -412,15 +481,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // MOSTRAR ALERTA DE DISPONIBILIDADE
     function mostrarAlertaDisponibilidade(dataStr) {
-        const disponibilidade = verificarDisponibilidadeDia(dataStr);
         const dataFormatada = formatarDataParaExibicao(new Date(dataStr));
+        const turnosSelecionados = obterTurnosSelecionados();
         
         let mensagem = `❌ ${dataFormatada} não está disponível`;
-        if (disponibilidade.turno) {
-            mensagem += ` no turno da ${disponibilidade.turno === 'manha' ? 'manhã' : 'tarde'}`;
-        }
-        if (disponibilidade.responsavel) {
-            mensagem += `\nJá reservado por: ${disponibilidade.responsavel}`;
+        
+        // Verificar qual turno está indisponível
+        for (const turno of turnosSelecionados) {
+            const disponibilidade = verificarDisponibilidadeDiaParaTurno(dataStr, turno);
+            if (!disponibilidade.disponivel) {
+                mensagem += ` no turno da ${turno === 'manha' ? 'manhã' : 'tarde'}`;
+                if (disponibilidade.responsavel) {
+                    mensagem += `\nJá reservado por: ${disponibilidade.responsavel}`;
+                }
+                break;
+            }
         }
         
         alert(mensagem);
@@ -517,9 +592,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // GERAR CALENDÁRIO MENSAL
     function gerarCalendarioMensal() {
-        if (!calendarioGrid) return;
-                console.error('Elemento calendarioGrid não encontrado!');
-
+        if (!calendarioGrid) {
+            console.error('Elemento calendarioGrid não encontrado!');
+            return;
+        }
         
         calendarioGrid.innerHTML = '';
         
@@ -638,6 +714,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Datas carregadas:', reservasExistentes.map(r => ({
                 id: r.id,
                 dias: r.dias,
+                turno: r.turno,
                 responsavel: r.responsavel
             })));
             
@@ -816,9 +893,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return { valido: false, erro: 'Selecione pelo menos um dia.' };
         }
         
-        const turnoSelecionado = document.querySelector('input[name="turno"]:checked');
-        if (!turnoSelecionado) {
-            return { valido: false, erro: 'Selecione um turno.' };
+        const turnosSelecionados = obterTurnosSelecionados();
+        if (turnosSelecionados.length === 0) {
+            return { valido: false, erro: 'Selecione pelo menos um turno.' };
         }
         
         // Verificar datas passadas
@@ -838,13 +915,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Verificar duplicidade de reserva
+        // Verificar duplicidade de reserva para CADA TURNO
         try {
             const snapshot = await db.collection('reservas')
                 .where('status', '==', 'aprovado')
                 .get();
             
-            const turno = turnoSelecionado.value;
             const conflitos = [];
             
             snapshot.forEach(doc => {
@@ -856,9 +932,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     return dataUTC ? formatarDataLocalParaString(dataUTC) : diaUTC;
                 }) : [];
                 
-                // Verificar sobreposição
+                // Verificar sobreposição para cada turno selecionado
                 for (const diaReserva of diasReservaLocal) {
-                    if (diasSelecionados.includes(diaReserva) && reserva.turno === turno) {
+                    if (diasSelecionados.includes(diaReserva) && turnosSelecionados.includes(reserva.turno)) {
                         const dataFormatada = parseDataStringLocal(diaReserva).toLocaleDateString('pt-BR');
                         const turnoStr = reserva.turno === 'manha' ? 'manhã' : 'tarde';
                         
@@ -873,10 +949,14 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (conflitos.length > 0) {
                 let mensagem = 'Conflito de reserva encontrado:\n\n';
-                conflitos.forEach(conflito => {
+                const conflitosUnicos = conflitos.filter((c, i, self) => 
+                    self.findIndex(t => t.data === c.data && t.turno === c.turno) === i
+                );
+                
+                conflitosUnicos.forEach(conflito => {
                     mensagem += `• ${conflito.data} (${conflito.turno}) - ${conflito.responsavel}\n`;
                 });
-                mensagem += '\nEscolha outro dia ou turno.';
+                mensagem += '\nEscolha outros dias ou turnos.';
                 
                 return { valido: false, erro: mensagem };
             }
@@ -888,7 +968,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return { valido: true };
     }
     
-    // 🔧 SALVAR RESERVA COM APROVAÇÃO AUTOMÁTICA
+    // 🔧 SALVAR RESERVA COM APROVAÇÃO AUTOMÁTICA (MÚLTIPLOS TURNOS)
     formReserva.onsubmit = async function(e) {
         e.preventDefault();
         
@@ -896,6 +976,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const regrasAceitas = document.querySelector('input[name="regras"]:checked');
         if (!regrasAceitas || regrasAceitas.value !== 'sim') {
             alert('❌ Você deve aceitar as regras do laboratório.');
+            return;
+        }
+        
+        const turnosSelecionados = obterTurnosSelecionados();
+        if (turnosSelecionados.length === 0) {
+            alert('❌ Selecione pelo menos um turno.');
             return;
         }
         
@@ -915,27 +1001,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log('Dias selecionados (local):', diasSelecionados);
         console.log('Dias para salvar (UTC):', diasUTC);
-        
-        // Coletar dados
-        const formData = {
-            email: document.getElementById('email').value,
-            whatsapp: document.getElementById('whatsapp').value,
-            responsavel: document.getElementById('responsavel').value,
-            finalidade: document.getElementById('finalidade').value,
-            ocupacao: document.getElementById('ocupacao').value,
-            dias: diasUTC, // 🔧 Usar formato UTC
-            turno: document.querySelector('input[name="turno"]:checked').value,
-            status: 'aprovado',
-            criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-            visualizado: false,
-            aprovadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-            aprovadoPor: 'sistema'
-        };
+        console.log('Turnos selecionados:', turnosSelecionados);
         
         // Botão de envio
         const submitBtn = formReserva.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Criando reserva...';
+        submitBtn.textContent = 'Criando reserva(s)...';
         submitBtn.disabled = true;
         
         try {
@@ -943,10 +1014,41 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('Banco de dados não disponível');
             }
             
-            console.log('Salvando reserva (aprovada automaticamente):', formData);
-            const docRef = await db.collection('reservas').add(formData);
+            // Criar uma reserva para CADA TURNO selecionado
+            const promises = turnosSelecionados.map(async (turno) => {
+                // Coletar dados (cada turno é uma reserva separada)
+                const formData = {
+                    email: document.getElementById('email').value,
+                    whatsapp: document.getElementById('whatsapp').value,
+                    responsavel: document.getElementById('responsavel').value,
+                    finalidade: document.getElementById('finalidade').value,
+                    ocupacao: document.getElementById('ocupacao').value,
+                    dias: diasUTC, // 🔧 Usar formato UTC
+                    turno: turno,
+                    status: 'aprovado',
+                    criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+                    visualizado: false,
+                    aprovadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+                    aprovadoPor: 'sistema',
+                    // Adicionar flag para indicar que faz parte de uma reserva múltipla
+                    reservaMultipla: turnosSelecionados.length > 1,
+                    turnosAssociados: turnosSelecionados.length > 1 ? turnosSelecionados : null
+                };
+                
+                console.log(`Salvando reserva para turno ${turno}:`, formData);
+                return await db.collection('reservas').add(formData);
+            });
             
-            alert(`✅ Reserva criada e APROVADA automaticamente!\n\nID: ${docRef.id}\nStatus: Aprovado\n\nA reserva já está ativa no sistema.`);
+            // Aguardar todas as reservas serem salvas
+            const resultados = await Promise.all(promises);
+            
+            // Mensagem de sucesso
+            if (turnosSelecionados.length === 1) {
+                alert(`✅ Reserva criada e APROVADA automaticamente!\n\nID: ${resultados[0].id}\nStatus: Aprovado\nTurno: ${turnosSelecionados[0] === 'manha' ? 'Manhã' : 'Tarde'}\n\nA reserva já está ativa no sistema.`);
+            } else {
+                const ids = resultados.map(r => r.id).join(', ');
+                alert(`✅ ${turnosSelecionados.length} reservas criadas e APROVADAS automaticamente!\n\nIDs: ${ids}\nTurnos: ${turnosSelecionados.map(t => t === 'manha' ? 'Manhã' : 'Tarde').join(' e ')}\n\nAs reservas já estão ativas no sistema.`);
+            }
             
             // Resetar
             modal.style.display = 'none';
@@ -960,7 +1062,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(carregarReservas, 500);
             }
             
-            mostrarFeedback('Reserva aprovada com sucesso!', 'sucesso');
+            mostrarFeedback('Reserva(s) aprovada(s) com sucesso!', 'sucesso');
             
         } catch (error) {
             console.error('Erro ao salvar:', error);
@@ -1049,24 +1151,16 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     document.head.appendChild(estiloAnimacoes);
     
-    // CLIQUE NAS CÉLULAS DA SEMANA
-    document.querySelectorAll('.dia-col').forEach(cell => {
-        cell.onclick = function() {
-            const turno = this.getAttribute('data-turno');
-            const radioTurno = document.querySelector(`input[name="turno"][value="${turno}"]`);
-            if (radioTurno) {
-                radioTurno.checked = true;
-            }
-            modal.style.display = 'flex';
-            
-            setTimeout(verificarDisponibilidadeDiasSelecionados, 100);
-        };
-    });
-    
-    // Monitorar mudanças no turno
-    document.querySelectorAll('input[name="turno"]').forEach(radio => {
-        radio.addEventListener('change', function() {
+    // Monitorar mudanças nos turnos (checkboxes)
+    document.querySelectorAll('.turno-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
             verificarDisponibilidadeDiasSelecionados();
+            
+            // Atualizar mini calendário para mostrar disponibilidade
+            atualizarMiniCalendario();
+            
+            // Atualizar visualização dos dias selecionados
+            atualizarDiasSelecionados();
         });
     });
     
@@ -1075,6 +1169,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('=== DEPURAÇÃO DE DATAS ===');
         console.log('Data atual:', dataAtual.toLocaleDateString('pt-BR'));
         console.log('Dias selecionados:', diasSelecionados);
+        console.log('Turnos selecionados:', obterTurnosSelecionados());
         console.log('Reservas existentes:', reservasExistentes.map(r => ({
             id: r.id,
             dias: r.dias,
@@ -1094,8 +1189,6 @@ document.addEventListener('DOMContentLoaded', function() {
     debugBtn.onclick = depurarDatas;
     document.body.appendChild(debugBtn);
     
-    // INICIALIZAÇÃO
-    atualizarMiniCalendario();
     // INICIALIZAÇÃO
     atualizarMiniCalendario();
     
@@ -1123,12 +1216,4 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('🔥 Firebase conectado. Pronto para uso!');
         }, 500);
     }
-
-// 🔥 INICIALIZAÇÃO DO CALENDÁRIO PADRÃO (MENSAL)
-viewAtual = 'monthly';
-
-atualizarTitulo();
-gerarCalendarioMensal();
-carregarReservas();
-
 });
