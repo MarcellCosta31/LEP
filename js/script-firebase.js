@@ -1,4 +1,4 @@
-// script-firebase.js - Com verificação de disponibilidade, correção de fuso horário e múltiplos turnos
+// script-firebase.js - Com verificação de disponibilidade, correção de fuso horário, múltiplos turnos e visualização de reservas
 
 // 🔥 CONFIGURAÇÃO DO FIREBASE
 const firebaseConfig = {
@@ -105,12 +105,33 @@ function converterDataFirestoreParaLocal(timestamp) {
     return null;
 }
 
+// 🔧 FUNÇÃO PARA FORMATAR OCUPAÇÃO
+function formatarOcupacao(ocupacao) {
+    if (!ocupacao) return 'Não informada';
+    
+    // Mapeamento de valores do select para textos mais amigáveis
+    const ocupacoesFormatadas = {
+        'portugues': 'Docente de Português',
+        'espanhol': 'Docente de Espanhol',
+        'matematica': 'Docente de Matemática',
+        'pedagogia': 'Docente de Pedagogia',
+        'historia': 'Docente de História',
+        'fisica': 'Docente de Física',
+        'engenharia': 'Docente de Engenharia de Produção',
+        'posgraduacao': 'Docente de Pós Graduação',
+        'estudante': 'Discente de Engenharia de Produção'
+    };
+    
+    return ocupacoesFormatadas[ocupacao] || ocupacao;
+}
+
 // AGUARDAR O CARREGAMENTO COMPLETO DA PÁGINA
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM carregado. Iniciando sistema de reservas...');
     
     // ELEMENTOS DO DOM
     const modal = document.getElementById('modalReserva');
+    const modalVisualizacao = document.getElementById('modalVisualizacao');
     const btnAbrir = document.getElementById('btnAbrirModal');
     const btnFechar = document.getElementById('btnFecharModal');
     const formReserva = document.getElementById('formReserva');
@@ -128,6 +149,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const miniPrevBtn = document.querySelector('.mini-prev');
     const miniNextBtn = document.querySelector('.mini-next');
     const diasSelecionadosDiv = document.getElementById('diasSelecionados');
+    
+    // Elementos do modal de visualização
+    const dataVisualizacaoSpan = document.getElementById('dataVisualizacao');
+    const reservasContainer = document.getElementById('reservasContainer');
+    const btnFecharVisualizacao = document.getElementById('btnFecharVisualizacao');
+    const btnFecharModalVisualizacao = document.getElementById('btnFecharModalVisualizacao');
+    const btnNovaReservaMesmaData = document.getElementById('btnNovaReservaMesmaData');
+    const closeModalBtn = document.querySelector('.close-modal');
     
     // ESTADO
     let dataAtual = new Date();
@@ -187,7 +216,69 @@ document.addEventListener('DOMContentLoaded', function() {
             diasSelecionados = [];
             atualizarDiasSelecionados();
         }
+        
+        if (event.target === modalVisualizacao) {
+            modalVisualizacao.style.display = 'none';
+        }
     };
+    
+    // Fechar modais com ESC
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            if (modal && modal.style.display === 'flex') {
+                modal.style.display = 'none';
+                formReserva.reset();
+                diasSelecionados = [];
+                atualizarDiasSelecionados();
+            }
+            
+            if (modalVisualizacao && modalVisualizacao.style.display === 'flex') {
+                modalVisualizacao.style.display = 'none';
+            }
+        }
+    });
+    
+    // 🔧 FUNÇÃO PARA ABRIR MODAL DE NOVA RESERVA COM DATA PRÉ-SELECIONADA
+    function abrirModalNovaReserva(dataStr) {
+        if (!modal) return;
+        
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        const dataObj = parseDataStringLocal(dataStr);
+        
+        if (!dataObj) return;
+        
+        const dataSelecionada = new Date(dataObj);
+        dataSelecionada.setHours(0, 0, 0, 0);
+        
+        // Não permitir datas passadas
+        if (dataSelecionada < hoje) {
+            alert('❌ Não é possível selecionar datas passadas.');
+            return;
+        }
+        
+        // Limpar seleções anteriores
+        diasSelecionados = [];
+        
+        // Adicionar a data clicada
+        if (dataStr && !diasSelecionados.includes(dataStr)) {
+            diasSelecionados.push(dataStr);
+            atualizarDiasSelecionados();
+            
+            // Atualizar mini calendário se necessário
+            const mesSelecionado = dataObj.getMonth();
+            const anoSelecionado = dataObj.getFullYear();
+            
+            if (mesSelecionado === miniDataAtual.getMonth() && 
+                anoSelecionado === miniDataAtual.getFullYear()) {
+                atualizarMiniCalendario();
+            }
+        }
+        
+        // Abrir modal
+        modal.style.display = 'flex';
+        verificarDisponibilidadeDiasSelecionados();
+    }
     
     // MINI CALENDÁRIO
     function atualizarMiniCalendario() {
@@ -641,8 +732,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="dia-info">Disponível</div>
             `;
             
-            // Clique para selecionar no modal
-            div.onclick = function() {
+            // Clique para verificar reservas ou fazer nova reserva
+            div.onclick = async function() {
                 const dataStr = this.dataset.data;
                 const dataObj = parseDataStringLocal(dataStr);
                 
@@ -651,36 +742,220 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 
-                const hoje = new Date();
-                hoje.setHours(0, 0, 0, 0);
-                const dataSelecionada = new Date(dataObj);
-                dataSelecionada.setHours(0, 0, 0, 0);
+                // Verificar se há reservas para esta data
+                const reservasParaDia = await obterReservasParaData(dataStr);
                 
-                // Não permitir datas passadas
-                if (dataSelecionada < hoje) {
-                    alert('❌ Não é possível selecionar datas passadas.');
-                    return;
+                if (reservasParaDia.length > 0) {
+                    // Se houver reservas, mostrar modal de visualização
+                    mostrarModalVisualizacao(dataStr, reservasParaDia);
+                } else {
+                    // Se não houver reservas, abrir modal normal para nova reserva
+                    abrirModalNovaReserva(dataStr);
                 }
-                
-                if (!diasSelecionados.includes(dataStr)) {
-                    diasSelecionados.push(dataStr);
-                    atualizarDiasSelecionados();
-                    
-                    // Sincronizar mini calendário
-                    const mesSelecionado = dataObj.getMonth();
-                    const anoSelecionado = dataObj.getFullYear();
-                    
-                    if (mesSelecionado === miniDataAtual.getMonth() && 
-                        anoSelecionado === miniDataAtual.getFullYear()) {
-                        atualizarMiniCalendario();
-                    }
-                }
-                
-                modal.style.display = 'flex';
-                verificarDisponibilidadeDiasSelecionados();
             };
             
             calendarioGrid.appendChild(div);
+        }
+    }
+    
+    // 🔧 FUNÇÃO PARA OBTER RESERVAS DE UMA DATA ESPECÍFICA
+    async function obterReservasParaData(dataStr) {
+        if (!db) return [];
+        
+        try {
+            // Converter data local para UTC para busca
+            const dataLocal = parseDataStringLocal(dataStr);
+            const dataUTC = formatarDataParaStringUTC(dataLocal);
+            
+            console.log(`Buscando reservas para data (UTC): ${dataUTC}`);
+            
+            const snapshot = await db.collection('reservas')
+                .where('status', '==', 'aprovado')
+                .get();
+            
+            const reservasParaDia = [];
+            
+            snapshot.forEach(doc => {
+                const reserva = doc.data();
+                const reservaConvertida = {
+                    id: doc.id,
+                    ...reserva,
+                    criadoEm: converterDataFirestoreParaLocal(reserva.criadoEm),
+                    aprovadoEm: converterDataFirestoreParaLocal(reserva.aprovadoEm)
+                };
+                
+                // Verificar se a reserva inclui este dia (considerando diferenças de fuso)
+                if (reserva.dias && Array.isArray(reserva.dias)) {
+                    const diasReservaLocal = reserva.dias.map(diaUTC => {
+                        const dataUTC = parseDataStringUTC(diaUTC);
+                        return dataUTC ? formatarDataLocalParaString(dataUTC) : diaUTC;
+                    });
+                    
+                    if (diasReservaLocal.includes(dataStr)) {
+                        reservasParaDia.push(reservaConvertida);
+                    }
+                }
+            });
+            
+            console.log(`Encontradas ${reservasParaDia.length} reservas para ${dataStr}`);
+            return reservasParaDia;
+            
+        } catch (error) {
+            console.error('Erro ao buscar reservas para data:', error);
+            return [];
+        }
+    }
+    
+    // 🔧 FUNÇÃO AUXILIAR PARA CRIAR CARD DE RESERVA
+    function criarCardReserva(reserva) {
+        const card = document.createElement('div');
+        card.className = `reserva-card ${reserva.turno}`;
+        
+        const turnoTexto = reserva.turno === 'manha' ? 'Manhã (08h às 12h)' : 'Tarde (14h às 17h)';
+        const ocupacaoFormatada = formatarOcupacao(reserva.ocupacao);
+        
+        card.innerHTML = `
+            <div class="reserva-card-header">
+                <div class="turno-icon ${reserva.turno}">
+                    ${reserva.turno === 'manha' ? 'M' : 'T'}
+                </div>
+                <h3>${reserva.responsavel || 'Não informado'}</h3>
+                <span class="reserva-horario">${turnoTexto}</span>
+            </div>
+            
+            <div class="reserva-detalhes">
+                <div class="detalhe-item">
+                    <strong>Ocupação:</strong>
+                    <span>${ocupacaoFormatada}</span>
+                </div>
+                
+                <div class="detalhe-item full-width">
+                    <strong>Finalidade:</strong>
+                    <div class="finalidade-texto">
+                        ${reserva.finalidade || 'Não informada'}
+                    </div>
+                </div>
+                
+                <div class="detalhe-item">
+                    <strong>Status:</strong>
+                    <span class="status-badge status-aprovado">Aprovado</span>
+                </div>
+            </div>
+        `;
+        
+        return card;
+    }
+    
+    // 🔧 FUNÇÃO PARA MOSTRAR MODAL DE VISUALIZAÇÃO
+    function mostrarModalVisualizacao(dataStr, reservas) {
+        if (!modalVisualizacao || !dataVisualizacaoSpan || !reservasContainer) {
+            console.error('Elementos do modal de visualização não encontrados');
+            return;
+        }
+
+        // Formatar data para exibição
+        const dataObj = parseDataStringLocal(dataStr);
+        const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // Capitalizar primeira letra
+        const dataFormatadaCapitalizada = dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1);
+        dataVisualizacaoSpan.textContent = dataFormatadaCapitalizada;
+
+        // Limpar container
+        reservasContainer.innerHTML = '';
+
+        if (reservas.length === 0) {
+            // Não deveria acontecer, mas por segurança
+            const semReservasDiv = document.createElement('div');
+            semReservasDiv.className = 'sem-reservas';
+            semReservasDiv.innerHTML = `
+                <div class="icon">📅</div>
+                <p>Nenhuma reserva encontrada para este dia.</p>
+                <button type="button" class="btn-secondary" onclick="abrirModalNovaReserva('${dataStr}')">Fazer reserva</button>
+            `;
+            reservasContainer.appendChild(semReservasDiv);
+        } else {
+            // Separar reservas por turno
+            const reservaManha = reservas.find(r => r.turno === 'manha');
+            const reservaTarde = reservas.find(r => r.turno === 'tarde');
+
+            // Se houver reserva pela manhã
+            if (reservaManha) {
+                // Separador
+                const separadorManha = document.createElement('div');
+                separadorManha.className = 'turno-separator';
+                separadorManha.innerHTML = '<h3>🌅 TURNO DA MANHÃ</h3>';
+                reservasContainer.appendChild(separadorManha);
+
+                // Card da reserva da manhã
+                const cardManha = criarCardReserva(reservaManha);
+                reservasContainer.appendChild(cardManha);
+            }
+
+            // Se houver reserva pela tarde
+            if (reservaTarde) {
+                // Separador
+                const separadorTarde = document.createElement('div');
+                separadorTarde.className = 'turno-separator';
+                separadorTarde.innerHTML = '<h3>🌇 TURNO DA TARDE</h3>';
+                reservasContainer.appendChild(separadorTarde);
+
+                // Card da reserva da tarde
+                const cardTarde = criarCardReserva(reservaTarde);
+                reservasContainer.appendChild(cardTarde);
+            }
+
+            // Aviso se ambos os turnos estão ocupados
+            if (reservaManha && reservaTarde) {
+                const avisoDiv = document.createElement('div');
+                avisoDiv.className = 'aviso-reserva-dupla';
+                avisoDiv.innerHTML = `
+                    <div class="info-aviso">
+                        <strong>⚠️ Ambos os turnos estão reservados para este dia.</strong>
+                        <p>Para fazer uma nova reserva, escolha outra data ou entre em contato com os responsáveis.</p>
+                    </div>
+                `;
+                reservasContainer.appendChild(avisoDiv);
+            }
+        }
+
+        // Mostrar modal
+        modalVisualizacao.style.display = 'flex';
+
+        // Configurar botões de fechar
+        if (btnFecharVisualizacao) {
+            btnFecharVisualizacao.onclick = function() {
+                modalVisualizacao.style.display = 'none';
+            };
+        }
+
+        if (btnFecharModalVisualizacao) {
+            btnFecharModalVisualizacao.onclick = function() {
+                modalVisualizacao.style.display = 'none';
+            };
+        }
+
+        if (closeModalBtn) {
+            closeModalBtn.onclick = function() {
+                modalVisualizacao.style.display = 'none';
+            };
+        }
+
+        // Configurar botão para nova reserva
+        if (btnNovaReservaMesmaData) {
+            btnNovaReservaMesmaData.onclick = function() {
+                modalVisualizacao.style.display = 'none';
+                
+                // Aguardar um pouco para o modal fechar
+                setTimeout(() => {
+                    abrirModalNovaReserva(dataStr);
+                }, 300);
+            };
         }
     }
     
@@ -805,7 +1080,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const dia = parseInt(diaDiv.dataset.dia);
             
             // Remover classes antigas
-            diaDiv.classList.remove('ocupado', 'ocupado-manha', 'ocupado-tarde', 'ocupado-ambos');
+            diaDiv.classList.remove('ocupado', 'ocupado-manha', 'ocupado-tarde', 'ocupado-ambos', 'tem-reserva');
             
             const info = diaDiv.querySelector('.dia-info');
             if (info) {
@@ -816,6 +1091,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const reservasDoDia = reservasPorDia[dia];
             
             if (reservasDoDia) {
+                // Adicionar classe para indicar que tem reserva
+                diaDiv.classList.add('tem-reserva');
+                
                 // Criar container para as informações
                 const infoContainer = document.createElement('div');
                 infoContainer.className = 'info-turnos';
@@ -876,7 +1154,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
                 
-                diaDiv.title = tooltipText;
+                diaDiv.title = 'Clique para ver detalhes da reserva';
                 
             } else {
                 // Dia disponível

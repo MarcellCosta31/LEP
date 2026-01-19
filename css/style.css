@@ -2197,3 +2197,372 @@ footer {
     border-left: 4px solid #004aad !important;
     border-right: 4px solid #ffa500 !important;
 }
+
+/* Indicador visual para dias com reservas */
+.calendario-grid .dia.tem-reserva {
+    cursor: pointer;
+    position: relative;
+}
+
+.calendario-grid .dia.tem-reserva:hover {
+    box-shadow: 0 0 0 2px rgba(0, 74, 173, 0.5);
+}
+
+.calendario-grid .dia.tem-reserva::after {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+/* Estilos para o modal de visualização - ATUALIZADO */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #eef4ff;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #004aad;
+    font-size: 1.5rem;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: #666;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.close-modal:hover {
+    background-color: #f0f0f0;
+    color: #ff4444;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.btn-primary {
+    background-color: #004aad;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #003a8c;
+}
+
+.btn-secondary {
+    background-color: #f8f9fa;
+    color: #004aad;
+    border: 2px solid #004aad;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+    background-color: #eef4ff;
+}
+
+/* Container de reservas */
+.reservas-container {
+    margin: 20px 0;
+}
+
+/* Separador de turnos */
+.turno-separator {
+    text-align: center;
+    margin: 25px 0 15px;
+    position: relative;
+}
+
+.turno-separator h3 {
+    display: inline-block;
+    background-color: #004aad;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    margin: 0;
+    font-size: 1rem;
+    position: relative;
+    z-index: 2;
+}
+
+.turno-separator::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #e0e0e0;
+    z-index: 1;
+}
+
+/* Cards de reserva */
+.reserva-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e0e7ff;
+}
+
+.reserva-card.manha {
+    border-top: 4px solid #004aad;
+}
+
+.reserva-card.tarde {
+    border-top: 4px solid #ffa500;
+}
+
+.reserva-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.turno-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+}
+
+.turno-icon.manha {
+    background-color: #004aad;
+}
+
+.turno-icon.tarde {
+    background-color: #ffa500;
+}
+
+.reserva-card-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.reserva-horario {
+    color: #666;
+    font-size: 0.9rem;
+    margin-left: auto;
+    font-style: italic;
+}
+
+.reserva-detalhes {
+    display: grid;
+    gap: 15px;
+}
+
+.detalhe-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    align-items: start;
+    gap: 10px;
+}
+
+.detalhe-item strong {
+    color: #495057;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.detalhe-item span {
+    color: #212529;
+    line-height: 1.5;
+}
+
+/* Para a finalidade, ocupar mais espaço */
+.detalhe-item.full-width {
+    grid-template-columns: 1fr;
+}
+
+.detalhe-item.full-width .finalidade-texto {
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 3px solid #004aad;
+    margin-top: 5px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Status badge */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.status-aprovado {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+/* Mensagem quando não há reservas */
+.sem-reservas {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.sem-reservas .icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    opacity: 0.3;
+}
+
+.sem-reservas p {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .modal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .close-modal {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .detalhe-item {
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+    
+    .reserva-card-header {
+        flex-wrap: wrap;
+    }
+    
+    .reserva-horario {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .reserva-card {
+        padding: 15px;
+    }
+    
+    .turno-separator h3 {
+        font-size: 0.9rem;
+        padding: 6px 15px;
+    }
+}
+
+/* Aviso para reservas em ambos os turnos */
+.aviso-reserva-dupla {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.info-aviso {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.info-aviso strong {
+    color: #856404;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.info-aviso p {
+    color: #856404;
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Indicador visual melhorado para dias com reservas */
+.calendario-grid .dia.tem-reserva {
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s;
+}
+
+.calendario-grid .dia.tem-reserva:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 74, 173, 0.15);
+    z-index: 10;
+}
+
+.calendario-grid .dia.tem-reserva::after {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 12px;
+    opacity: 0.8;
+    background: rgba(255, 255, 255, 0.9);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.calendario-grid .dia.tem-reserva:hover::after {
+    background: #004aad;
+    color: white;
+    opacity: 1;
+}

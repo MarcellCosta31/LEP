@@ -279,6 +279,24 @@
         </div>
     </div>
 
+<!-- MODAL DE VISUALIZAÇÃO DE RESERVA -->
+<div class="modal" id="modalVisualizacao">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Reserva(s) para <span id="dataVisualizacao"></span></h2>
+            <button type="button" class="close-modal" id="btnFecharVisualizacao">×</button>
+        </div>
+        
+        <div class="reservas-container" id="reservasContainer">
+            <!-- As reservas serão carregadas aqui dinamicamente -->
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" id="btnNovaReservaMesmaData" class="btn-secondary">Fazer nova reserva</button>
+            <button type="button" id="btnFecharModalVisualizacao" class="btn-primary">Fechar</button>
+        </div>
+    </div>
+</div>
     <footer>
         © 2026 - Laboratório de Engenharia de Produção
     </footer>
