@@ -1,4 +1,10 @@
-// admin-scripts.js - Lógica principal do painel administrativo
+// admin-scripts.js - Lógica principal do painel administrativo (VERSÃO COMPLETA COM EXPORTAÇÃO AVANÇADA)
+
+// Variáveis globais para a aba de Reservas
+let currentPage = 1;
+const itemsPerPage = 20;
+let currentReservas = [];
+let selectedReservas = new Set();
 
 document.addEventListener('DOMContentLoaded', function () {
     if (!document.querySelector('.admin-container')) return;
@@ -15,6 +21,33 @@ document.addEventListener('DOMContentLoaded', function () {
     // Carregar dados iniciais
     loadInitialData();
 });
+
+// Função de debug para verificar se o Firebase está funcionando
+async function debugFirebase() {
+    console.log('=== DEBUG FIREBASE ===');
+    console.log('adminFirebase disponível?', typeof window.adminFirebase !== 'undefined');
+    console.log('Firestore disponível?', adminFirebase.db ? 'Sim' : 'Não');
+    console.log('Auth disponível?', adminFirebase.auth ? 'Sim' : 'Não');
+    
+    try {
+        // Testar uma consulta simples
+        const snapshot = await adminFirebase.db.collection('reservas').limit(1).get();
+        console.log(`Total de reservas no Firestore: ${snapshot.size}`);
+        
+        if (snapshot.size > 0) {
+            snapshot.forEach(doc => {
+                console.log('Exemplo de reserva:', doc.id, doc.data());
+            });
+        }
+    } catch (error) {
+        console.error('Erro no teste do Firestore:', error);
+    }
+    
+    console.log('=== FIM DEBUG ===');
+}
+
+// Chamar após 2 segundos do carregamento
+setTimeout(debugFirebase, 2000);
 
 // Navegação entre views
 function setupNavigation() {
@@ -88,6 +121,8 @@ function setupDashboard() {
 
 async function loadDashboardData() {
     try {
+        console.log('🔄 Carregando dados do dashboard...');
+        
         // Carregar todas as reservas
         const reservas = await adminFirebase.getAllReservas();
         
@@ -96,15 +131,16 @@ async function loadDashboardData() {
         const seteDiasAtras = new Date();
         seteDiasAtras.setDate(hoje.getDate() - 7);
         
-        const reservasRecentes = reservas.filter(r => 
+        // Filtrar reservas desta semana
+        const reservasEstaSemana = reservas.filter(r => 
             r.criadoEm && r.criadoEm >= seteDiasAtras
         );
         
         // Calcular estatísticas
         const totalReservas = reservas.length;
         const aprovadas = reservas.filter(r => r.status === 'aprovado').length;
-        const pendentes = reservas.filter(r => r.status === 'pendente').length;
-        const recusadas = reservas.filter(r => r.status === 'recusado').length;
+        
+        console.log(`Estatísticas: Total=${totalReservas}, Aprovadas=${aprovadas}, EstaSemana=${reservasEstaSemana.length}`);
         
         // Atualizar interface - TOTAL DE RESERVAS
         const totalElement = document.getElementById('totalReservas');
@@ -112,11 +148,17 @@ async function loadDashboardData() {
             animateCounter(totalElement, totalReservas);
         }
         
-        // Atualizar outras estatísticas (se os elementos existirem)
-        updateStatElement('reservasAprovadas', aprovadas);
-        updateStatElement('reservasPendentes', pendentes);
-        updateStatElement('reservasRecusadas', recusadas);
-        updateStatElement('reservasEstaSemana', reservasRecentes.length);
+        // Atualizar RESERVAS APROVADAS
+        const aprovadasElement = document.getElementById('reservasAprovadas');
+        if (aprovadasElement) {
+            animateCounter(aprovadasElement, aprovadas);
+        }
+        
+        // Atualizar ESTA SEMANA
+        const estaSemanaElement = document.getElementById('reservasEstaSemana');
+        if (estaSemanaElement) {
+            animateCounter(estaSemanaElement, reservasEstaSemana.length);
+        }
         
         // Calcular percentual de aprovação
         const percentAprovadas = totalReservas > 0 ? 
@@ -140,7 +182,7 @@ async function loadDashboardData() {
         const trendElement = document.getElementById('reservasTrend');
         if (trendElement) {
             const semanaAnterior = reservasSemanaAnterior.length;
-            const estaSemana = reservasRecentes.length;
+            const estaSemana = reservasEstaSemana.length;
             
             let trendText = '';
             let trendColor = '#28a745';
@@ -168,13 +210,20 @@ async function loadDashboardData() {
         }
         
         // Carregar atividade recente (últimas 10 reservas)
-        loadRecentActivity(reservasRecentes.slice(0, 10));
+        // Usar reservas gerais, não só desta semana
+        const reservasRecentes = [...reservas]
+            .sort((a, b) => b.criadoEm - a.criadoEm)
+            .slice(0, 10);
+        
+        loadRecentActivity(reservasRecentes);
         
         // Atualizar gráfico se existir
-        updateDashboardChart(reservasRecentes);
+        updateDashboardChart(reservasEstaSemana);
+        
+        console.log('✅ Dashboard carregado com sucesso');
         
     } catch (error) {
-        console.error('Erro ao carregar dados do dashboard:', error);
+        console.error('❌ Erro ao carregar dados do dashboard:', error);
         showNotification('Erro ao carregar dashboard', 'erro');
     }
 }
@@ -279,45 +328,76 @@ function loadRecentActivity(reservas) {
     const activityList = document.getElementById('recentActivity');
     if (!activityList) return;
     
-    // Ordenar por data (mais recente primeiro)
-    const recentReservas = [...reservas]
-        .sort((a, b) => b.criadoEm - a.criadoEm)
-        .slice(0, 10);
-    
     activityList.innerHTML = '';
     
-    if (recentReservas.length === 0) {
+    if (reservas.length === 0) {
         activityList.innerHTML = `
             <div class="activity-item">
                 <div class="activity-icon">📭</div>
                 <div class="activity-content">
                     Nenhuma atividade recente
-                    <div class="activity-time">Sem reservas nos últimos dias</div>
+                    <div class="activity-time">Sem reservas registradas</div>
                 </div>
             </div>
         `;
         return;
     }
     
-    recentReservas.forEach(reserva => {
+    reservas.forEach(reserva => {
         const activityItem = document.createElement('div');
         activityItem.className = 'activity-item';
         
-        const timeAgo = getTimeAgo(reserva.criadoEm);
+        // Formatar data
+        const dataFormatada = reserva.criadoEm ? 
+            formatarDataParaExibicaoDashboard(reserva.criadoEm) : 
+            'Data não disponível';
+        
+        // Formatar turno
+        const turnoFormatado = reserva.turno === 'manha' ? 'Manhã' : 'Tarde';
+        
+        // Status
         const statusIcon = getStatusIcon(reserva.status);
         const statusClass = getStatusClass(reserva.status);
         
         activityItem.innerHTML = `
             <div class="activity-icon ${statusClass}">${statusIcon}</div>
             <div class="activity-content">
-                <strong>${reserva.responsavel || 'Usuário'}</strong>
-                <div>${getActivityText(reserva)}</div>
-                <div class="activity-time">${timeAgo}</div>
+                <div class="activity-header">
+                    <strong>${reserva.responsavel || 'Usuário'}</strong>
+                    <span class="activity-turno ${reserva.turno}">
+                        ${turnoFormatado}
+                    </span>
+                </div>
+                <div class="activity-details">
+                    <span class="activity-data">${dataFormatada}</span>
+                    <span class="activity-status status-${reserva.status}">
+                        ${getStatusText(reserva.status)}
+                    </span>
+                </div>
+                <div class="activity-time">${getTimeAgo(reserva.criadoEm)}</div>
             </div>
         `;
         
         activityList.appendChild(activityItem);
     });
+}
+
+// Função auxiliar para formatar data do dashboard
+function formatarDataParaExibicaoDashboard(date) {
+    if (!date) return '';
+    
+    // Se for string, converter para Date
+    let dataObj;
+    if (typeof date === 'string') {
+        dataObj = new Date(date);
+    } else if (date.toDate) {
+        // Se for timestamp do Firestore
+        dataObj = date.toDate();
+    } else {
+        dataObj = date;
+    }
+    
+    return dataObj.toLocaleDateString('pt-BR');
 }
 
 function getStatusClass(status) {
@@ -356,24 +436,22 @@ function getStatusIcon(status) {
     return icons[status] || '📝';
 }
 
-function getActivityText(reserva) {
-    const diasCount = reserva.dias ? reserva.dias.length : 0;
-    const turnoText = reserva.turno === 'manha' ? 'manhã' : 'tarde';
-    
-    switch (reserva.status) {
-        case 'aprovado':
-            return `reservou ${diasCount} dias para ${turnoText}`;
-        case 'pendente':
-            return `solicitou ${diasCount} dias para ${turnoText}`;
-        case 'recusado':
-            return `reserva recusada para ${turnoText}`;
-        default:
-            return 'fez uma reserva';
-    }
+function getStatusText(status) {
+    const statusMap = {
+        aprovado: 'Aprovado',
+        pendente: 'Pendente',
+        recusado: 'Recusado'
+    };
+    return statusMap[status] || status;
 }
 
 // Gerenciamento de Reservas
-function setupReservas() {
+async function setupReservas() {
+    // Carregar bibliotecas de exportação
+    await loadSheetJS().catch(() => {
+        console.warn('SheetJS não pôde ser carregado. Usando CSV como fallback.');
+    });
+    
     const filterStatus = document.getElementById('filterStatus');
     const filterDate = document.getElementById('filterDate');
     const applyFilterBtn = document.getElementById('btnApplyFilter');
@@ -384,12 +462,6 @@ function setupReservas() {
     const exportBtn = document.getElementById('btnExportReservas');
     const prevPageBtn = document.getElementById('prevPage');
     const nextPageBtn = document.getElementById('nextPage');
-    
-    // Estado da paginação
-    let currentPage = 1;
-    const itemsPerPage = 20;
-    let currentReservas = [];
-    let selectedReservas = new Set();
     
     // Aplicar filtros
     if (applyFilterBtn) {
@@ -441,7 +513,7 @@ function setupReservas() {
             
             if (!action || reservaIds.length === 0) return;
             
-            if (confirm(`Deseja realmente ${ getBulkActionText(action) } ${ reservaIds.length } reserva(s) ? `)) {
+            if (confirm(`Deseja realmente ${ getBulkActionText(action) } ${ reservaIds.length } reserva(s)?`)) {
                 try {
                     switch (action) {
                         case 'approve':
@@ -455,7 +527,7 @@ function setupReservas() {
                             break;
                     }
                     
-                    showNotification(`${ reservaIds.length } reserva(s) ${ getBulkActionDoneText(action) } `, 'sucesso');
+                    showNotification(`${ reservaIds.length } reserva(s) ${ getBulkActionDoneText(action) }`, 'sucesso');
                     loadReservasData();
                     
                     // Resetar seleção
@@ -471,23 +543,23 @@ function setupReservas() {
         });
     }
     
-    // Exportar
+    // Exportar em múltiplos formatos
+    const exportOptions = document.querySelectorAll('.export-option');
+    
+    exportOptions.forEach(option => {
+        option.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const format = this.getAttribute('data-format');
+            await exportReservas(format);
+        });
+    });
+    
+    // Manter compatibilidade com clique no botão principal
     if (exportBtn) {
-        exportBtn.addEventListener('click', async function() {
-            try {
-                const reservas = await adminFirebase.getAllReservas({
-                    limit: 1000
-                });
-                
-                const csv = adminFirebase.exportToFormat(reservas, 'csv');
-                downloadFile(csv, 'reservas_lep.csv', 'text/csv');
-                
-                showNotification('Reservas exportadas com sucesso', 'sucesso');
-                
-            } catch (error) {
-                console.error('Erro ao exportar:', error);
-                showNotification('Erro ao exportar reservas', 'erro');
-            }
+        exportBtn.addEventListener('click', async function(e) {
+            e.stopPropagation();
+            // Por padrão exporta como Excel
+            await exportReservas('xlsx');
         });
     }
     
@@ -510,10 +582,15 @@ function setupReservas() {
             }
         });
     }
+    
+    // Carregar reservas ao inicializar
+    loadReservasData();
 }
 
 async function loadReservasData() {
     try {
+        console.log('🔄 Carregando dados das reservas...');
+        
         const filterStatus = document.getElementById('filterStatus').value;
         const filterDate = document.getElementById('filterDate').value;
         
@@ -532,13 +609,41 @@ async function loadReservasData() {
             options.endDate = endDate;
         }
         
+        console.log('Opções de filtro:', options);
+        
         currentReservas = await adminFirebase.getAllReservas(options);
+        
+        console.log(`✅ ${currentReservas.length} reservas carregadas`);
+        
+        // Log das primeiras reservas para debug
+        if (currentReservas.length > 0) {
+            console.log('Primeira reserva:', {
+                id: currentReservas[0].id,
+                responsavel: currentReservas[0].responsavel,
+                status: currentReservas[0].status,
+                criadoEm: currentReservas[0].criadoEm,
+                dias: currentReservas[0].dias
+            });
+        }
+        
         currentPage = 1;
         renderReservasTable();
         
     } catch (error) {
-        console.error('Erro ao carregar reservas:', error);
+        console.error('❌ Erro ao carregar reservas:', error);
         showNotification('Erro ao carregar reservas', 'erro');
+        
+        // Fallback: mostrar mensagem na tabela
+        const tableBody = document.getElementById('reservasTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="loading-cell erro">
+                        Erro ao carregar reservas: ${error.message}
+                    </td>
+                </tr>
+            `;
+        }
     }
 }
 
@@ -548,7 +653,22 @@ function renderReservasTable() {
     const prevPageBtn = document.getElementById('prevPage');
     const nextPageBtn = document.getElementById('nextPage');
     
-    if (!tableBody) return;
+    if (!tableBody) {
+        console.error('Elemento reservasTableBody não encontrado!');
+        return;
+    }
+    
+    // Verificar se há reservas
+    if (!currentReservas || currentReservas.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8" class="loading-cell">
+                    Nenhuma reserva encontrada
+                </td>
+            </tr>
+        `;
+        return;
+    }
     
     // Calcular paginação
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -556,9 +676,11 @@ function renderReservasTable() {
     const pageReservas = currentReservas.slice(startIndex, endIndex);
     const totalPages = Math.ceil(currentReservas.length / itemsPerPage);
     
+    console.log(`Renderizando ${pageReservas.length} reservas (página ${currentPage}/${totalPages})`);
+    
     // Atualizar informações da página
     if (pageInfo) {
-        pageInfo.textContent = `Página ${ currentPage } de ${ totalPages } `;
+        pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
     }
     
     if (prevPageBtn) {
@@ -572,46 +694,56 @@ function renderReservasTable() {
     // Renderizar tabela
     tableBody.innerHTML = '';
     
-    if (pageReservas.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="8" class="loading-cell">
-                    Nenhuma reserva encontrada
-                </td>
-            </tr>
-        `;
-        return;
-    }
-    
     pageReservas.forEach(reserva => {
         const row = document.createElement('tr');
         const isSelected = selectedReservas.has(reserva.id);
+        
+        // Formatar data de criação
+        const criadoEmFormatado = reserva.criadoEm ? 
+            formatarDataParaExibicaoDashboard(reserva.criadoEm) : 
+            'Data não disponível';
+        
+        // Formatar dias
+        const diasCount = reserva.dias ? reserva.dias.length : 0;
+        const diasPreview = getDiasPreview(reserva.dias);
+        
+        // Formatar turno
+        const turnoText = reserva.turno === 'manha' ? 'Manhã' : 'Tarde';
+        const turnoClass = reserva.turno === 'manha' ? 'status-pendente' : 'status-aprovado';
+        
+        // Formatar status
+        const statusText = getStatusText(reserva.status);
+        const statusClass = `status-${reserva.status}`;
         
         row.innerHTML = `
             <td>
                 <input type="checkbox" class="reserva-checkbox" 
                        data-id="${reserva.id}" ${isSelected ? 'checked' : ''}>
             </td>
-            <td>${reserva.criadoEm ? reserva.criadoEm.toLocaleDateString('pt-BR') : ''}</td>
+            <td>${criadoEmFormatado}</td>
             <td>
-                <strong>${reserva.responsavel || ''}</strong><br>
-                <small>${reserva.email || ''}</small>
+                <div class="responsavel-info">
+                    <strong>${reserva.responsavel || 'Não informado'}</strong>
+                    <div class="responsavel-email">${reserva.email || ''}</div>
+                </div>
             </td>
             <td>
-                ${reserva.dias ? reserva.dias.length : 0} dia(s)<br>
-                <small>${getDiasPreview(reserva.dias)}</small>
+                <div class="dias-info">
+                    <span class="dias-count">${diasCount} dia(s)</span>
+                    <div class="dias-preview">${diasPreview}</div>
+                </div>
             </td>
             <td>
-                <span class="status-badge ${reserva.turno === 'manha' ? 'status-pendente' : 'status-aprovado'}">
-                    ${reserva.turno === 'manha' ? 'Manhã' : 'Tarde'}
+                <span class="status-badge ${turnoClass}">
+                    ${turnoText}
                 </span>
             </td>
             <td>
-                <span class="status-badge status-${reserva.status || 'pendente'}">
-                    ${getStatusText(reserva.status)}
+                <span class="status-badge ${statusClass}">
+                    ${statusText}
                 </span>
             </td>
-            <td>${reserva.criadoEm ? formatDateTime(reserva.criadoEm) : ''}</td>
+            <td>${formatDateTime(reserva.criadoEm)}</td>
             <td>
                 <div class="action-buttons">
                     <button class="btn-action btn-view" data-id="${reserva.id}" 
@@ -678,29 +810,47 @@ function renderReservasTable() {
 }
 
 function getDiasPreview(dias) {
-    if (!dias || !Array.isArray(dias)) return '';
-    
-    if (dias.length <= 3) {
-        return dias.join(', ');
+    if (!dias || !Array.isArray(dias) || dias.length === 0) {
+        return '<small>Sem dias selecionados</small>';
     }
     
-    return `${ dias.slice(0, 3).join(', ') }...`;
-}
-
-function getStatusText(status) {
-    const statusMap = {
-        aprovado: 'Aprovado',
-        pendente: 'Pendente',
-        recusado: 'Recusado'
-    };
-    return statusMap[status] || status;
+    // Tentar formatar as datas
+    const diasFormatados = dias.map(diaStr => {
+        try {
+            // Tente parse como data no formato YYYY-MM-DD
+            if (typeof diaStr === 'string' && diaStr.includes('-')) {
+                const [ano, mes, dia] = diaStr.split('-');
+                return `${dia}/${mes}/${ano}`;
+            }
+            return diaStr;
+        } catch (e) {
+            return diaStr;
+        }
+    });
+    
+    if (diasFormatados.length <= 2) {
+        return `<small>${diasFormatados.join(', ')}</small>`;
+    }
+    
+    return `<small>${diasFormatados[0]}, ${diasFormatados[1]}... +${diasFormatados.length - 2}</small>`;
 }
 
 function formatDateTime(date) {
     if (!date) return '';
     
-    return date.toLocaleDateString('pt-BR') + ' ' + 
-           date.toLocaleTimeString('pt-BR', { 
+    // Se for string, converter para Date
+    let dataObj;
+    if (typeof date === 'string') {
+        dataObj = new Date(date);
+    } else if (date.toDate) {
+        // Se for timestamp do Firestore
+        dataObj = date.toDate();
+    } else {
+        dataObj = date;
+    }
+    
+    return dataObj.toLocaleDateString('pt-BR') + ' ' + 
+           dataObj.toLocaleTimeString('pt-BR', { 
                hour: '2-digit', 
                minute: '2-digit' 
            });
@@ -778,33 +928,110 @@ async function viewReservaDetails(reservaId) {
         if (doc.exists) {
             const reserva = doc.data();
             
-            let details = `
-                <strong>Responsável:</strong> ${reserva.responsavel || ''}<br>
-                <strong>E-mail:</strong> ${reserva.email || ''}<br>
-                <strong>WhatsApp:</strong> ${reserva.whatsapp || ''}<br>
-                <strong>Ocupação:</strong> ${reserva.ocupacao || ''}<br>
-                <strong>Turno:</strong> ${reserva.turno === 'manha' ? 'Manhã' : 'Tarde'}<br>
-                <strong>Status:</strong> ${getStatusText(reserva.status)}<br>
-                <strong>Dias:</strong><br>
-            `;
+            // Converter timestamps
+            const criadoEm = reserva.criadoEm ? 
+                reserva.criadoEm.toDate().toLocaleString('pt-BR') : 
+                'Não disponível';
+            const aprovadoEm = reserva.aprovadoEm ? 
+                reserva.aprovadoEm.toDate().toLocaleString('pt-BR') : 
+                'Não aprovado ainda';
             
+            // Formatar turno
+            const turnoText = reserva.turno === 'manha' ? 'Manhã (08h às 12h)' : 'Tarde (14h às 17h)';
+            
+            // Formatar dias
+            let diasHtml = '';
             if (reserva.dias && Array.isArray(reserva.dias)) {
                 reserva.dias.forEach(dia => {
-                    details += `• ${formatDateString(dia)}<br>`;
+                    try {
+                        const [ano, mes, diaNum] = dia.split('-');
+                        diasHtml += `• ${diaNum}/${mes}/${ano}<br>`;
+                    } catch (e) {
+                        diasHtml += `• ${dia}<br>`;
+                    }
                 });
             }
             
-            details += `<br><strong>Finalidade:</strong><br>${reserva.finalidade || ''}`;
+            let details = `
+                <h3>📋 Detalhes da Reserva</h3>
+                <hr>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <p><strong>👤 Responsável:</strong> ${reserva.responsavel || ''}</p>
+                    <p><strong>📧 E-mail:</strong> ${reserva.email || ''}</p>
+                    <p><strong>📱 WhatsApp:</strong> ${reserva.whatsapp || ''}</p>
+                    <p><strong>🎓 Ocupação:</strong> ${reserva.ocupacao || ''}</p>
+                    <p><strong>⏰ Turno:</strong> ${turnoText}</p>
+                    <p><strong>📊 Status:</strong> ${getStatusText(reserva.status)}</p>
+                    
+                    <p><strong>📅 Dias Reservados (${reserva.dias ? reserva.dias.length : 0}):</strong></p>
+                    <div style="margin-left: 20px; margin-bottom: 15px;">
+                        ${diasHtml || 'Nenhum dia registrado'}
+                    </div>
+                    
+                    <p><strong>📝 Finalidade:</strong></p>
+                    <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                        ${reserva.finalidade || 'Não informada'}
+                    </div>
+                    
+                    <hr>
+                    <p><strong>📅 Criado em:</strong> ${criadoEm}</p>
+                    <p><strong>✅ Aprovado em:</strong> ${aprovadoEm}</p>
+                </div>
+            `;
             
-            if (reserva.criadoEm) {
-                details += `<br><br><strong>Criado em:</strong> ${formatDateTime(reserva.criadoEm.toDate())}`;
-            }
+            // Criar modal customizado
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+            `;
             
-            if (reserva.aprovadoEm && reserva.aprovadoPor) {
-                details += `<br><strong>Aprovado em:</strong> ${formatDateTime(reserva.aprovadoEm.toDate())}`;
-            }
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: white;
+                padding: 30px;
+                border-radius: 10px;
+                max-width: 500px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            `;
             
-            alert(details);
+            modalContent.innerHTML = details;
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = 'Fechar';
+            closeBtn.style.cssText = `
+                background: var(--primary-color);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                margin-top: 20px;
+                width: 100%;
+            `;
+            closeBtn.onclick = () => document.body.removeChild(modal);
+            
+            modalContent.appendChild(closeBtn);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Fechar ao clicar fora
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            };
         }
         
     } catch (error) {
@@ -833,10 +1060,20 @@ async function editReserva(reservaId) {
             
             if (reserva.dias && Array.isArray(reserva.dias)) {
                 reserva.dias.forEach(dia => {
-                    const diaTag = document.createElement('span');
-                    diaTag.className = 'dia-tag';
-                    diaTag.textContent = formatDateString(dia);
-                    diasContainer.appendChild(diaTag);
+                    try {
+                        const [ano, mes, diaNum] = dia.split('-');
+                        const diaFormatado = `${diaNum}/${mes}/${ano}`;
+                        
+                        const diaTag = document.createElement('span');
+                        diaTag.className = 'dia-tag';
+                        diaTag.textContent = diaFormatado;
+                        diasContainer.appendChild(diaTag);
+                    } catch (e) {
+                        const diaTag = document.createElement('span');
+                        diaTag.className = 'dia-tag';
+                        diaTag.textContent = dia;
+                        diasContainer.appendChild(diaTag);
+                    }
                 });
             }
             
@@ -878,7 +1115,7 @@ async function editReserva(reservaId) {
 }
 
 async function deleteSingleReserva(reservaId) {
-    if (confirm('Deseja realmente excluir esta reserva?')) {
+    if (confirm('⚠️ Deseja realmente excluir esta reserva?\nEsta ação não pode ser desfeita.')) {
         try {
             await adminFirebase.deleteReserva(reservaId);
             showNotification('Reserva excluída com sucesso', 'sucesso');
@@ -897,6 +1134,371 @@ function formatDateString(dateStr) {
     } catch (e) {
         return dateStr;
     }
+}
+
+// FUNÇÕES DE EXPORTAÇÃO AVANÇADAS
+async function loadSheetJS() {
+    return new Promise((resolve, reject) => {
+        if (window.XLSX) {
+            resolve();
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+async function loadJSPDF() {
+    return new Promise((resolve, reject) => {
+        if (window.jspdf) {
+            resolve();
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';
+        script.onload = () => {
+            // Carregar também autoTable
+            const autoTableScript = document.createElement('script');
+            autoTableScript.src = 'https://unpkg.com/jspdf-autotable@3.5.28/dist/jspdf.plugin.autotable.min.js';
+            autoTableScript.onload = resolve;
+            autoTableScript.onerror = reject;
+            document.head.appendChild(autoTableScript);
+        };
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+// Nova função principal de exportação
+async function exportReservas(format = 'xlsx') {
+    try {
+        // Mostrar loading
+        const exportBtn = document.getElementById('btnExportReservas');
+        const originalHTML = exportBtn.innerHTML;
+        exportBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Exportando ${format.toUpperCase()}...`;
+        exportBtn.disabled = true;
+        
+        // Obter filtros atuais
+        const filterStatus = document.getElementById('filterStatus').value;
+        const filterDate = document.getElementById('filterDate').value;
+        
+        const options = {};
+        if (filterStatus !== 'all') {
+            options.status = filterStatus;
+        }
+        
+        if (filterDate) {
+            const date = new Date(filterDate);
+            date.setHours(0, 0, 0, 0);
+            options.startDate = date;
+            
+            const endDate = new Date(filterDate);
+            endDate.setHours(23, 59, 59, 999);
+            options.endDate = endDate;
+        }
+        
+        // Carregar reservas com os mesmos filtros
+        const reservas = await adminFirebase.getAllReservas(options);
+        
+        // Gerar dados formatados
+        const excelData = generateExcelData(reservas);
+        
+        let blob;
+        let fileName;
+        const hoje = new Date();
+        const dataStr = hoje.toISOString().split('T')[0].replace(/-/g, '');
+        
+        switch (format.toLowerCase()) {
+            case 'xlsx':
+                blob = exportWithSheetJS(excelData);
+                fileName = `reservas_lep_${dataStr}.xlsx`;
+                break;
+            case 'csv':
+                blob = exportAsCSV(excelData);
+                fileName = `reservas_lep_${dataStr}.csv`;
+                break;
+            case 'pdf':
+                try {
+                    blob = await exportAsPDF(excelData);
+                    fileName = `reservas_lep_${dataStr}.pdf`;
+                } catch (error) {
+                    console.error('Erro ao gerar PDF:', error);
+                    showNotification('Erro ao gerar PDF. Exportando como Excel.', 'alerta');
+                    blob = exportWithSheetJS(excelData);
+                    fileName = `reservas_lep_${dataStr}.xlsx`;
+                }
+                break;
+            default:
+                blob = exportWithSheetJS(excelData);
+                fileName = `reservas_lep_${dataStr}.xlsx`;
+        }
+        
+        // Download
+        downloadExcelFile(blob, fileName);
+        
+        showNotification(`${reservas.length} reservas exportadas como ${format.toUpperCase()}`, 'sucesso');
+        
+    } catch (error) {
+        console.error('Erro ao exportar:', error);
+        showNotification(`Erro ao exportar como ${format.toUpperCase()}`, 'erro');
+    } finally {
+        // Restaurar botão
+        const exportBtn = document.getElementById('btnExportReservas');
+        if (exportBtn) {
+            exportBtn.innerHTML = '<i class="fas fa-file-export"></i> Exportar';
+            exportBtn.disabled = false;
+        }
+    }
+}
+
+function generateExcelData(reservas) {
+    // Cabeçalhos da tabela
+    const headers = [
+        'ID',
+        'Data da Reserva',
+        'Responsável',
+        'E-mail',
+        'WhatsApp',
+        'Ocupação',
+        'Dias Reservados',
+        'Turno',
+        'Status',
+        'Finalidade',
+        'Criado em',
+        'Aprovado em',
+        'Atualizado em'
+    ];
+    
+    // Converter reservas para formato de linha
+    const rows = reservas.map(reserva => {
+        // Formatar datas
+        const dataReserva = reserva.criadoEm ? 
+            formatDateTime(reserva.criadoEm).split(' ')[0] : 
+            '';
+        
+        // Formatar dias
+        let diasFormatados = '';
+        if (reserva.dias && Array.isArray(reserva.dias)) {
+            diasFormatados = reserva.dias.map(dia => {
+                try {
+                    const [ano, mes, diaNum] = dia.split('-');
+                    return `${diaNum}/${mes}/${ano}`;
+                } catch (e) {
+                    return dia;
+                }
+            }).join(', ');
+        }
+        
+        // Formatar turno
+        const turnoFormatado = reserva.turno === 'manha' ? 'Manhã (08h-12h)' : 
+                              reserva.turno === 'tarde' ? 'Tarde (14h-17h)' : 
+                              reserva.turno || '';
+        
+        // Formatar status
+        const statusFormatado = getStatusText(reserva.status);
+        
+        // Formatar datas timestamps
+        const criadoEm = reserva.criadoEm ? formatDateTime(reserva.criadoEm) : '';
+        const aprovadoEm = reserva.aprovadoEm ? 
+            (reserva.aprovadoEm.toDate ? 
+                formatDateTime(reserva.aprovadoEm.toDate()) : 
+                formatDateTime(reserva.aprovadoEm)) : '';
+        const atualizadoEm = reserva.atualizadoEm ? 
+            (reserva.atualizadoEm.toDate ? 
+                formatDateTime(reserva.atualizadoEm.toDate()) : 
+                formatDateTime(reserva.atualizadoEm)) : '';
+        
+        return [
+            reserva.id || '',
+            dataReserva,
+            reserva.responsavel || '',
+            reserva.email || '',
+            reserva.whatsapp || '',
+            reserva.ocupacao || '',
+            diasFormatados,
+            turnoFormatado,
+            statusFormatado,
+            reserva.finalidade || '',
+            criadoEm,
+            aprovadoEm,
+            atualizadoEm
+        ];
+    });
+    
+    return { headers, rows };
+}
+
+function exportWithSheetJS(excelData) {
+    // Criar uma nova pasta de trabalho
+    const wb = XLSX.utils.book_new();
+    
+    // Converter dados para worksheet
+    const wsData = [
+        // Título
+        ['RELATÓRIO DE RESERVAS - LEP'],
+        ['Data de exportação:', new Date().toLocaleDateString('pt-BR')],
+        ['Total de reservas:', excelData.rows.length],
+        [], // Linha vazia
+        excelData.headers, // Cabeçalhos
+        ...excelData.rows // Dados
+    ];
+    
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    
+    // Ajustar largura das colunas
+    const colWidths = [
+        { wch: 25 }, // ID
+        { wch: 12 }, // Data
+        { wch: 20 }, // Responsável
+        { wch: 25 }, // E-mail
+        { wch: 15 }, // WhatsApp
+        { wch: 15 }, // Ocupação
+        { wch: 30 }, // Dias
+        { wch: 15 }, // Turno
+        { wch: 10 }, // Status
+        { wch: 40 }, // Finalidade
+        { wch: 20 }, // Criado em
+        { wch: 20 }, // Aprovado em
+        { wch: 20 }  // Atualizado em
+    ];
+    ws['!cols'] = colWidths;
+    
+    // Formatar células
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    
+    // Título
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: C });
+        if (!ws[cellAddress]) ws[cellAddress] = {};
+        ws[cellAddress].s = {
+            font: { bold: true, sz: 14 },
+            alignment: { horizontal: 'center' }
+        };
+    }
+    
+    // Cabeçalhos (linha 4)
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellAddress = XLSX.utils.encode_cell({ r: 4, c: C });
+        if (!ws[cellAddress]) ws[cellAddress] = {};
+        ws[cellAddress].s = {
+            font: { bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "004AAD" } },
+            alignment: { horizontal: 'center', vertical: 'center' }
+        };
+    }
+    
+    // Adicionar worksheet à pasta de trabalho
+    XLSX.utils.book_append_sheet(wb, ws, "Reservas");
+    
+    // Gerar arquivo
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    return new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+}
+
+function exportAsCSV(excelData) {
+    // Função fallback para CSV
+    let csv = 'RELATÓRIO DE RESERVAS - LEP\n';
+    csv += `Data de exportação:,${new Date().toLocaleDateString('pt-BR')}\n`;
+    csv += `Total de reservas:,${excelData.rows.length}\n\n`;
+    
+    // Cabeçalhos
+    csv += excelData.headers.map(h => `"${h}"`).join(',') + '\n';
+    
+    // Dados
+    excelData.rows.forEach(row => {
+        csv += row.map(cell => {
+            // Escapar vírgulas e aspas
+            if (typeof cell === 'string') {
+                return `"${cell.replace(/"/g, '""')}"`;
+            }
+            return `"${cell}"`;
+        }).join(',') + '\n';
+    });
+    
+    return new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+}
+
+// Função para exportar como PDF (opcional)
+async function exportAsPDF(excelData) {
+    // Carregar jsPDF se não estiver disponível
+    if (!window.jspdf) {
+        await loadJSPDF();
+    }
+    
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('landscape');
+    
+    // Título
+    doc.setFontSize(16);
+    doc.text('RELATÓRIO DE RESERVAS - LEP', 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Data de exportação: ${new Date().toLocaleDateString('pt-BR')}`, 14, 25);
+    doc.text(`Total de reservas: ${excelData.rows.length}`, 14, 30);
+    
+    // Preparar dados da tabela
+    const tableData = excelData.rows.map(row => [...row]);
+    const tableHeaders = excelData.headers;
+    
+    // Configurar tabela
+    doc.autoTable({
+        head: [tableHeaders],
+        body: tableData,
+        startY: 35,
+        theme: 'grid',
+        styles: {
+            fontSize: 8,
+            cellPadding: 2,
+            overflow: 'linebreak'
+        },
+        headStyles: {
+            fillColor: [0, 74, 173], // Azul LEP
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        alternateRowStyles: {
+            fillColor: [240, 240, 240]
+        },
+        columnStyles: {
+            0: { cellWidth: 25 }, // ID
+            1: { cellWidth: 15 }, // Data
+            2: { cellWidth: 20 }, // Responsável
+            3: { cellWidth: 25 }, // E-mail
+            5: { cellWidth: 15 }, // Ocupação
+            6: { cellWidth: 30 }, // Dias
+            9: { cellWidth: 40 }  // Finalidade
+        },
+        margin: { top: 35 }
+    });
+    
+    // Número de páginas
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text(
+            `Página ${i} de ${pageCount}`,
+            doc.internal.pageSize.width - 30,
+            doc.internal.pageSize.height - 10
+        );
+    }
+    
+    return doc.output('blob');
+}
+
+function downloadExcelFile(blob, fileName) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 // Relatórios
@@ -1379,13 +1981,13 @@ async function restoreData() {
     input.click();
 }
 
-async function clearOldData() {
-    const days = prompt('Excluir reservas mais antigas que quantos dias?', '90');
+async function clearOldData(days = 90) {
+    const daysInput = prompt('Excluir reservas mais antigas que quantos dias?', '90');
 
-    if (days && !isNaN(days) && parseInt(days) > 0) {
-        if (confirm(`Deseja excluir reservas com mais de ${days} dias?\nEsta ação não pode ser desfeita.`)) {
+    if (daysInput && !isNaN(daysInput) && parseInt(daysInput) > 0) {
+        if (confirm(`Deseja excluir reservas com mais de ${daysInput} dias?\nEsta ação não pode ser desfeita.`)) {
             try {
-                const count = await adminFirebase.clearOldData(parseInt(days));
+                const count = await adminFirebase.clearOldData(parseInt(daysInput));
                 showNotification(`${count} reservas antigas excluídas`, 'sucesso');
                 loadDashboardData();
 
@@ -1494,8 +2096,87 @@ function showNotification(message, type = 'info') {
 
 // Carregar dados iniciais
 async function loadInitialData() {
+    console.log('🔄 Carregando dados iniciais...');
     await loadDashboardData();
 }
+
+// No arquivo admin-scripts.js, adicione:
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    const sidebarOverlay = document.createElement('div');
+    
+    // Cria o overlay
+    sidebarOverlay.className = 'sidebar-overlay';
+    document.body.appendChild(sidebarOverlay);
+    
+    // Alterna o menu
+    menuToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleSidebar();
+    });
+    
+    // Fecha o menu ao clicar no overlay
+    sidebarOverlay.addEventListener('click', function() {
+        closeSidebar();
+    });
+    
+    // Fecha o menu ao clicar em um link (opcional)
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                closeSidebar();
+            }
+        });
+    });
+    
+    // Fecha o menu ao pressionar ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeSidebar();
+        }
+    });
+    
+    // Fecha o menu ao redimensionar para desktop
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            mainContent.classList.remove('expanded');
+            menuToggle.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
+        }
+    });
+    
+    function toggleSidebar() {
+        sidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active');
+        mainContent.classList.toggle('expanded');
+        menuToggle.classList.toggle('active');
+        document.body.classList.toggle('sidebar-open');
+        
+        // Alterna ícone
+        const icon = menuToggle.querySelector('i');
+        if (menuToggle.classList.contains('active')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-times');
+        } else {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        }
+    }
+    
+    function closeSidebar() {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+        mainContent.classList.remove('expanded');
+        menuToggle.classList.remove('active');
+        menuToggle.querySelector('i').classList.remove('fa-times');
+        menuToggle.querySelector('i').classList.add('fa-bars');
+        document.body.classList.remove('sidebar-open');
+    }
+});
 
 // Verificar se há atualizações em tempo real
 function setupRealTimeUpdates() {
@@ -1517,3 +2198,48 @@ function setupRealTimeUpdates() {
 
 // Inicializar atualizações em tempo real
 setTimeout(setupRealTimeUpdates, 3000);
+
+// Adicionar animações CSS dinamicamente
+const estiloAnimacoes = document.createElement('style');
+estiloAnimacoes.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+    
+    .notification-sucesso {
+        background-color: #d4edda !important;
+        color: #155724 !important;
+        border-color: #c3e6cb !important;
+    }
+    
+    .notification-erro {
+        background-color: #f8d7da !important;
+        color: #721c24 !important;
+        border-color: #f5c6cb !important;
+    }
+    
+    .notification-alerta {
+        background-color: #fff3cd !important;
+        color: #856404 !important;
+        border-color: #ffeaa7 !important;
+    }
+`;
+document.head.appendChild(estiloAnimacoes);

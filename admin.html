@@ -9,6 +9,8 @@
 </head>
 <body>
     <div class="admin-container">
+
+        
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -16,15 +18,15 @@
             </div>
             
             <nav class="sidebar-nav">
+                
+
                 <a href="#" class="nav-item active" data-view="dashboard">
                     <i class="fas fa-chart-bar"></i> Dashboard
                 </a>
                 <a href="#" class="nav-item" data-view="reservas">
                     <i class="fas fa-calendar-check"></i> Reservas
                 </a>
-                <a href="#" class="nav-item" data-view="relatorios">
-                    <i class="fas fa-file-alt"></i> Relatórios
-                </a>
+
             </nav>
             
             <div class="sidebar-footer">
@@ -37,6 +39,9 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="main-header">
+                <button id="menuToggle" class="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
                 <h1 id="pageTitle">Dashboard</h1>
                 <div class="user-info">
                     <span id="userName">Administrador</span>
@@ -48,59 +53,50 @@
 
 <!-- Dashboard View -->
 <div id="dashboardView" class="content-view active-view">
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-header">
-                <h3>Total Reservas</h3>
-                <i class="fas fa-calendar-alt"></i>
-            </div>
-            <div class="stat-number" id="totalReservas">0</div>
-            <div class="stat-trend" id="reservasTrend">Carregando...</div>
+    <!-- Verifique se está assim no dashboard -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-header">
+            <h3>Total Reservas</h3>
+            <i class="fas fa-calendar-alt"></i>
         </div>
-        
-        <div class="stat-card">
-            <div class="stat-header">
-                <h3>Aprovadas</h3>
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="stat-number" id="reservasAprovadas">0</div>
-            <div class="stat-subtitle" id="aprovadasPercent">0%</div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-header">
-                <h3>Pendentes</h3>
-                <i class="fas fa-clock"></i>
-            </div>
-            <div class="stat-number" id="reservasPendentes">0</div>
-            <div class="stat-subtitle">Aguardando</div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-header">
-                <h3>Esta Semana</h3>
-                <i class="fas fa-chart-line"></i>
-            </div>
-            <div class="stat-number" id="reservasEstaSemana">0</div>
-            <div class="stat-subtitle">Últimos 7 dias</div>
-        </div>
+        <div class="stat-number" id="totalReservas">0</div>
+        <div class="stat-trend" id="reservasTrend">Carregando...</div>
     </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <h3>Aprovadas</h3>
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-number" id="reservasAprovadas">0</div>
+        <div class="stat-subtitle" id="aprovadasPercent">0%</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <h3>Esta Semana</h3>
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-number" id="reservasEstaSemana">0</div>
+        <div class="stat-subtitle">Últimos 7 dias</div>
+    </div>
+</div>
 
-    <div class="dashboard-row">
-        <div class="chart-container">
-            <h3>Reservas Recentes</h3>
-            <canvas id="dashboardChart" height="200"></canvas>
-        </div>
-        
-        <div class="recent-activity">
-            <h3>Atividade Recente</h3>
-            <div class="activity-list" id="recentActivity">
-                <div class="activity-item loading">
-                    Carregando atividades...
-                </div>
+<div class="dashboard-row">
+    
+    
+    <div class="recent-activity">
+        <h3>Atividade Recente</h3>
+        <div class="activity-list" id="recentActivity">
+            <div class="activity-item loading">
+                Carregando atividades...
             </div>
         </div>
     </div>
+</div>
+
+   
 </div>
 
             <!-- Reservas View -->
