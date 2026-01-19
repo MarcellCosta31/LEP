@@ -137,7 +137,7 @@ body {
 }
 
 .sidebar {
-    width: 250px;
+    width: 50px;
     background-color: white;
     box-shadow: var(--shadow);
     display: flex;
@@ -2098,6 +2098,168 @@ input:checked + .slider:before {
     }
     
     .sidebar-header {
+        padding-right: 50px;
+    }
+}
+
+/* ==================== MOBILE PROJECT NAME ==================== */
+
+.mobile-project-name {
+    display: none;
+    padding: 20px 15px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    background-color: rgba(0, 74, 173, 0.05);
+    margin-bottom: 10px;
+}
+
+.mobile-project-name span {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.mobile-project-name small {
+    font-size: 0.8rem;
+    color: var(--secondary-color);
+}
+
+/* ==================== SIDEBAR RESPONSIVIDADE ATUALIZADA ==================== */
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 280px;
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    /* Mostrar nome do projeto apenas em mobile */
+    .mobile-project-name {
+        display: block;
+    }
+    
+    /* Esconder o header normal em mobile */
+    .sidebar-header {
+        display: none;
+    }
+    
+    /* Ajustar navegação */
+    .sidebar-nav {
+        padding-top: 0;
+    }
+    
+    /* Ajustar footer para subir o botão de logout */
+    .sidebar-footer {
+        position: relative;
+        margin-top: auto;
+        padding: 15px;
+    }
+    
+    .btn-logout {
+        width: calc(100% - 30px);
+        position: relative;
+        bottom: auto;
+    }
+}
+
+/* Para tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .sidebar {
+        width: 220px;
+    }
+    
+    .main-content {
+        margin-left: 220px;
+    }
+    
+    .mobile-project-name {
+        display: none; /* Não mostrar em tablet */
+    }
+    
+    .sidebar-header {
+        display: block; /* Mostrar header normal */
+    }
+}
+
+/* ==================== CORREÇÃO DO BUG DO CONTADOR ==================== */
+
+/* Remover a animação pulse que estava causando loop infinito */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+    /* REMOVER: animation: pulse 2s infinite; */
+}
+
+/* ==================== AJUSTES ADICIONAIS PARA MOBILE ==================== */
+
+@media (max-width: 768px) {
+    .sidebar.active .sidebar-header {
+        display: none; /* Manter escondido mesmo quando sidebar ativa */
+    }
+    
+    /* Ajustar o botão de logout para ficar mais visível */
+    .btn-logout {
+        background-color: #fff;
+        color: var(--danger-color);
+        border: 2px solid var(--danger-color);
+        padding: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-logout:hover {
+        background-color: var(--danger-color);
+        color: white;
+    }
+    
+    /* Ajustar ícone do botão */
+    .btn-logout i {
+        font-size: 1.1rem;
+    }
+    
+    /* Garantir que o span seja mostrado em mobile */
+    .sidebar.active .btn-logout span {
+        display: inline;
+    }
+}
+
+/* ==================== BOTÃO DE FECHAR (OPCIONAL) ==================== */
+
+.sidebar-close-btn {
+    display: none;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    z-index: 1001;
+}
+
+@media (max-width: 768px) {
+    .sidebar-close-btn {
+        display: block;
+    }
+    
+    /* Adicionar padding extra para o botão de fechar não sobrepor */
+    .mobile-project-name {
         padding-right: 50px;
     }
 }

@@ -241,18 +241,38 @@ function updateStatElement(elementId, value) {
 }
 
 function animateCounter(element, target) {
-    const current = parseInt(element.textContent) || 0;
+    // Se já estiver no valor alvo, não fazer nada
+    const currentText = element.textContent.trim();
+    const current = parseInt(currentText) || 0;
+    
+    // Se já estiver no valor alvo, não animar
+    if (current === target) {
+        element.textContent = target;
+        return;
+    }
+    
+    // Limpar qualquer animação anterior
+    if (element.__counterInterval) {
+        clearInterval(element.__counterInterval);
+        delete element.__counterInterval;
+    }
+    
+    // Configurar animação
     const increment = target > current ? 1 : -1;
-    const speed = Math.floor(1000 / Math.abs(target - current));
+    const difference = Math.abs(target - current);
+    const duration = 500; // 0.5 segundos no total
+    const speed = Math.max(10, Math.floor(duration / difference)); // Mínimo de 10ms
     
     let currentValue = current;
     
-    const timer = setInterval(() => {
+    element.__counterInterval = setInterval(() => {
         currentValue += increment;
         element.textContent = currentValue;
         
+        // Verificar se chegou ao alvo
         if (currentValue === target) {
-            clearInterval(timer);
+            clearInterval(element.__counterInterval);
+            delete element.__counterInterval;
         }
     }, speed);
 }
