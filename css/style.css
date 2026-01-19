@@ -2545,24 +2545,3 @@ footer {
     z-index: 10;
 }
 
-.calendario-grid .dia.tem-reserva::after {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    font-size: 12px;
-    opacity: 0.8;
-    background: rgba(255, 255, 255, 0.9);
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.calendario-grid .dia.tem-reserva:hover::after {
-    background: #004aad;
-    color: white;
-    opacity: 1;
-}
