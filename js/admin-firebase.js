@@ -29,6 +29,45 @@ auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     .then(() => console.log('Persistência configurada'))
     .catch(error => console.error('Erro na persistência:', error));
 
+// NO admin-firebase.js - ADICIONAR ESTA FUNÇÃO NO INÍCIO DO ARQUIVO
+// Função para verificar se o usuário está autenticado e é admin
+async function verifyAdminAccess() {
+    console.log('🔒 Verificando acesso administrativo...');
+    
+    try {
+        // Aguardar autenticação
+        return new Promise((resolve, reject) => {
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    console.log('✅ Usuário autenticado:', user.email);
+                    
+                    // Verificar se é admin
+                    const isAdmin = await checkIfAdmin(user.uid);
+                    if (isAdmin) {
+                        resolve(user);
+                    } else {
+                        console.error('❌ Usuário não é administrador');
+                        reject(new Error('Acesso não autorizado. Apenas administradores.'));
+                    }
+                } else {
+                    console.error('❌ Nenhum usuário autenticado');
+                    reject(new Error('Por favor, faça login primeiro.'));
+                }
+            });
+        });
+    } catch (error) {
+        console.error('❌ Erro na verificação:', error);
+        throw error;
+    }
+}
+
+// Adicionar esta função ao objeto window.adminFirebase
+window.adminFirebase = {
+    // ... outras funções existentes ...
+    verifyAdminAccess,  // <-- ADICIONAR ESTA LINHA
+    // ... resto das funções ...
+};
+
 // FUNÇÕES PRINCIPAIS
 async function loginAdmin(email, password) {
     console.log('🔐 Tentando login:', email);

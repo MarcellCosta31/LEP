@@ -135,7 +135,6 @@ async function handleLogin(e) {
     }
 }
 
-// CONFIGURAR PÁGINA ADMIN
 function setupAdminPage() {
     console.log('⚙️ Configurando página admin...');
     
@@ -145,7 +144,8 @@ function setupAdminPage() {
         logoutBtn.addEventListener('click', async function() {
             try {
                 await adminFirebase.logoutAdmin();
-                window.location.href = 'login.html';
+                // ALTERAÇÃO: Redirecionar para index.html em vez de login.html
+                window.location.href = '../index.html'; // ou apenas 'index.html' dependendo da estrutura
             } catch (error) {
                 console.error('Erro no logout:', error);
                 alert('Erro ao fazer logout');
