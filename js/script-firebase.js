@@ -1495,3 +1495,200 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     }
 });
+
+// 🔥 EASTER EGG: TRIPLE CLICK EM "MARCELL"
+document.addEventListener('DOMContentLoaded', function() {
+    // Encontrar todas as células com o nome "Marcell"
+    const celulasMarcell = document.querySelectorAll('.dia-col[data-turno="tarde"]');
+    
+    // Contador de cliques e timestamp do último clique
+    let clickCount = 0;
+    let lastClickTime = 0;
+    const clickTimeout = 1000; // 1 segundo para resetar contador
+    
+    celulasMarcell.forEach(celula => {
+        // Verificar se realmente contém "Marcell"
+        if (celula.textContent.trim() === 'Marcell' || celula.textContent.includes('Marcell')) {
+            celula.style.cursor = 'pointer';
+            celula.title = 'Clique 3 vezes para um segredo...';
+            
+            // Adicionar efeito visual sutil
+            const originalBackground = celula.style.backgroundColor;
+            
+            celula.addEventListener('mouseenter', function() {
+                this.style.transition = 'background-color 0.3s';
+                this.style.backgroundColor = 'rgba(0, 74, 173, 0.1)';
+            });
+            
+            celula.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = originalBackground;
+            });
+            
+            // Detectar triple click
+            celula.addEventListener('click', function(e) {
+                const currentTime = new Date().getTime();
+                
+                // Resetar contador se passou muito tempo
+                if (currentTime - lastClickTime > clickTimeout) {
+                    clickCount = 0;
+                }
+                
+                clickCount++;
+                lastClickTime = currentTime;
+                
+                // Efeito visual para cada clique
+                this.style.transform = 'scale(0.95)';
+                this.style.transition = 'transform 0.1s';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 100);
+                
+                // Efeito de brilho
+                this.style.boxShadow = '0 0 10px rgba(0, 74, 173, 0.5)';
+                setTimeout(() => {
+                    this.style.boxShadow = '';
+                }, 300);
+                
+                // Adicionar contador visual temporário
+                const counter = document.createElement('div');
+                counter.textContent = `${clickCount}/3`;
+                counter.style.position = 'absolute';
+                counter.style.top = '5px';
+                counter.style.right = '5px';
+                counter.style.background = '#004aad';
+                counter.style.color = 'white';
+                counter.style.borderRadius = '50%';
+                counter.style.width = '20px';
+                counter.style.height = '20px';
+                counter.style.fontSize = '10px';
+                counter.style.display = 'flex';
+                counter.style.alignItems = 'center';
+                counter.style.justifyContent = 'center';
+                counter.style.fontWeight = 'bold';
+                this.style.position = 'relative';
+                this.appendChild(counter);
+                
+                setTimeout(() => {
+                    if (counter.parentNode === this) {
+                        this.removeChild(counter);
+                    }
+                }, 500);
+                
+                // Se clicou 3 vezes
+                if (clickCount === 3) {
+                    // Efeito especial
+                    this.style.animation = 'pulse 0.5s 3';
+                    
+                    // Criar efeito de confetti local
+                    criarMiniConfetti(e.clientX, e.clientY);
+                    
+                    // Som de sucesso (opcional)
+                    fazerSomEasterEgg();
+                    
+                    // Mensagem
+                    setTimeout(() => {
+                                                    window.open('dedicatoria.html', '_blank');
+
+                        
+                        // Resetar contador
+                        clickCount = 0;
+                        lastClickTime = 0;
+                        
+                        // Remover efeito
+                        this.style.animation = '';
+                    }, 800);
+                }
+                
+                e.stopPropagation();
+            });
+        }
+    });
+    
+    // Função para criar confetti local
+    function criarMiniConfetti(x, y) {
+        const colors = ['#004aad', '#ffa500', '#25D366', '#ffc107'];
+        for (let i = 0; i < 15; i++) {
+            const confetti = document.createElement('div');
+            confetti.style.position = 'fixed';
+            confetti.style.width = '8px';
+            confetti.style.height = '8px';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.borderRadius = '50%';
+            confetti.style.left = (x - 4) + 'px';
+            confetti.style.top = (y - 4) + 'px';
+            confetti.style.zIndex = '10000';
+            confetti.style.pointerEvents = 'none';
+            document.body.appendChild(confetti);
+            
+            // Animação
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 2 + Math.random() * 3;
+            const vx = Math.cos(angle) * velocity;
+            const vy = Math.sin(angle) * velocity;
+            
+            let posX = x;
+            let posY = y;
+            
+            function animar() {
+                posX += vx;
+                posY += vy;
+                vy += 0.1; // gravidade
+                
+                confetti.style.left = posX + 'px';
+                confetti.style.top = posY + 'px';
+                
+                if (posY < window.innerHeight) {
+                    requestAnimationFrame(animar);
+                } else {
+                    confetti.remove();
+                }
+            }
+            
+            requestAnimationFrame(animar);
+            
+            // Remover após 2 segundos
+            setTimeout(() => {
+                if (confetti.parentNode) {
+                    confetti.remove();
+                }
+            }, 2000);
+        }
+    }
+    
+    // Função para som do easter egg
+    function fazerSomEasterEgg() {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Melodia simples
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+            oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+            oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+            
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        } catch (e) {
+            // Navegador não suporta AudioContext
+            console.log('Som do Easter Egg não disponível');
+        }
+    }
+    
+    // Adicionar animação de pulso ao CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    `;
+    document.head.appendChild(style);
+});

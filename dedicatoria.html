@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dedicatória | Criador do Sistema</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .dedicatoria-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 74, 173, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dedicatoria-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #004aad, #ffa500, #25D366);
+        }
+        
+        .perfil-criador {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #eef4ff;
+            flex-wrap: wrap;
+        }
+        
+        .foto-perfil {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #004aad;
+            box-shadow: 0 10px 25px rgba(0, 74, 173, 0.2);
+        }
+        
+        .info-perfil {
+            flex: 1;
+            min-width: 250px;
+            text-align: left;
+        }
+        
+        .nome-criador {
+            color: #004aad;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .formacao-criador {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        
+        .descricao-pessoal {
+            color: #555;
+            line-height: 1.6;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+        
+        .contatos-criador {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .contato-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .contato-github {
+            background: #24292e;
+            color: white;
+        }
+        
+        .contato-instagram {
+            background: linear-gradient(45deg, #833AB4, #FD1D1D, #F77737);
+            color: white;
+        }
+        
+        .contato-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+        
+        .contato-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .easter-egg-header {
+            margin-bottom: 30px;
+        }
+        
+        .easter-egg-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .easter-egg-title {
+            color: #004aad;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .easter-egg-subtitle {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+        }
+        
+        .mensagem-dedicatoria {
+            background: #f8faff;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 5px solid #004aad;
+            text-align: left;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            position: relative;
+        }
+        
+        .assinatura {
+            text-align: right;
+            margin-top: 30px;
+            font-style: italic;
+            color: #004aad;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .assinatura::before {
+            content: "— ";
+        }
+        
+        .detalhes-criador {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin: 40px 0;
+        }
+        
+        .info-criador {
+            background: #eef4ff;
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .info-criador h3 {
+            color: #004aad;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .voltar-btn {
+            display: inline-block;
+            background: #004aad;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 30px;
+            transition: all 0.3s;
+            border: 2px solid #004aad;
+        }
+        
+        .voltar-btn:hover {
+            background: white;
+            color: #004aad;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 74, 173, 0.2);
+        }
+        
+        .contador-easter {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #ffa500;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            box-shadow: 0 5px 15px rgba(255, 165, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .secreto {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 50px;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .dedicatoria-container {
+                margin: 20px;
+                padding: 20px;
+            }
+            
+            .perfil-criador {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .info-perfil {
+                text-align: center;
+            }
+            
+            .foto-perfil {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .nome-criador {
+                font-size: 1.8rem;
+            }
+            
+            .contatos-criador {
+                justify-content: center;
+            }
+            
+            .easter-egg-title {
+                font-size: 1.8rem;
+            }
+            
+            .easter-egg-icon {
+                font-size: 3rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .contato-link {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dedicatoria-container">
+        <!-- Perfil do Criador -->
+        <div class="perfil-criador">
+            <img src="imagens/image.png" alt="Marcell Costa de Sena" class="foto-perfil" onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80'">
+            <div class="info-perfil">
+                <h1 class="nome-criador">Marcell Costa de Sena</h1>
+                <p class="descricao-pessoal">
+                    Sou estudante de Engenharia de Produção, com foco em melhoria de processos e otimização de sistemas produtivos. Tenho interesse em programação e no uso de tecnologias para automação, análise de dados e desenvolvimento de soluções computacionais. Busco integrar engenharia e tecnologia para aumentar eficiência, desempenho e qualidade organizacional.
+                </p>
+                
+                <div class="contatos-criador">
+                    <a href="https://github.com/MarcellCosta31" target="_blank" class="contato-link contato-github">
+                        <span>GitHub</span>
+                    </a>
+                    <a href="https://www.instagram.com/marcell_luacheia?igsh=cTE2a2hseDV5anB6" target="_blank" class="contato-link contato-instagram">
+                        <span>Instagram</span>
+                    </a>
+                    <a href="https://wa.me/5591985331371?text=Olá%20Marcell!%20Vi%20seu%20contato%20no%20site%20do%20LEP%20e%20gostaria%20de%20conversar." target="_blank" class="contato-link contato-whatsapp">
+                        <span>WhatsApp</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="easter-egg-header">
+            <div class="easter-egg-icon">🎉</div>
+            <h1 class="easter-egg-title">Easter Egg Encontrado!</h1>
+            <p class="easter-egg-subtitle">Você descobriu a página secreta de dedicação</p>
+        </div>
+        
+        <div class="mensagem-dedicatoria">
+            <p>Para todos os professores, alunos e funcionários da Universidade Federal do Pará que utilizam este sistema,</p>
+            
+            <p>Este sistema foi desenvolvido com carinho e dedicação para facilitar o gerenciamento das reservas do Laboratório de Engenharia de Produção. Cada linha de código foi pensada para proporcionar uma experiência simples, intuitiva e eficiente.</p>
+            
+            <p>Que esta ferramenta possa contribuir para a organização e otimização do uso dos recursos do LEP, permitindo que o foco permaneça no que realmente importa: a educação, pesquisa e desenvolvimento de futuros engenheiros.</p>
+            
+            <p>Espero que este sistema traga benefícios reais para o dia a dia acadêmico e que possa evoluir conforme as necessidades da comunidade universitária.</p>
+            
+            <div class="assinatura">Marcell Costa de Sena</div>
+        </div>
+        
+        <div class="detalhes-criador">
+            <div class="info-criador">
+                <h3>📅 Sistema LEP</h3>
+                <p>Sistema de Reservas do Laboratório de Engenharia de Produção</p>
+                <p><strong>Versão:</strong> 1.0.0</p>
+                <p><strong>Ano:</strong> 2026</p>
+            </div>
+            
+            <div class="info-criador">
+                <h3>🎯 Objetivo</h3>
+                <p>Digitalizar e otimizar o processo de reservas do laboratório, proporcionando transparência e eficiência no agendamento.</p>
+            </div>
+            
+            <div class="info-criador">
+                <h3>💡 Tecnologias</h3>
+                <p>HTML5, CSS3, JavaScript, Firebase</p>
+                <p>Design responsivo e acessível</p>
+            </div>
+        </div>
+        
+        <a href="index.html" class="voltar-btn">Voltar ao Sistema de Reservas</a>
+        
+        <div class="secreto">
+            <p>🔍 Este easter egg foi ativado após 3 cliques em "Marcell" na visualização semanal</p>
+            <p>Obrigado por explorar o sistema! 🚀</p>
+        </div>
+    </div>
+    
+    <div class="contador-easter">
+        🥚 Easter Egg Ativado
+    </div>
+    
+    <script>
+        // Adicionar efeito confetti ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Criar confetti simples
+            function criarConfetti() {
+                const colors = ['#004aad', '#ffa500', '#25D366', '#ff4444', '#ffc107'];
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.style.position = 'fixed';
+                    confetti.style.width = '10px';
+                    confetti.style.height = '10px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.borderRadius = '50%';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-20px';
+                    confetti.style.zIndex = '9999';
+                    confetti.style.pointerEvents = 'none';
+                    document.body.appendChild(confetti);
+                    
+                    // Animar confetti
+                    const animation = confetti.animate([
+                        { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                        { transform: `translateY(${window.innerHeight + 20}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                    ], {
+                        duration: 2000 + Math.random() * 2000,
+                        easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
+                    });
+                    
+                    animation.onfinish = () => confetti.remove();
+                }
+            }
+            
+            // Disparar confetti após 300ms
+            setTimeout(criarConfetti, 300);
+            
+            // Adicionar som de descoberta (opcional)
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log('Áudio não suportado neste navegador');
+            }
+        });
+    </script>
+</body>
+</html>
