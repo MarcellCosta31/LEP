@@ -179,37 +179,35 @@
             </div>
         </section>
 
-                <!-- SEÇÃO DE SUPORTE/CONTATO -->
+        <!-- SEÇÃO DE SUPORTE/CONTATO -->
         <section class="card secao-suporte">
             <h3>Dúvidas sobre o LEP?</h3>
             <p style="text-align: center; color: #555; margin-bottom: 20px;">
                 Entre em contato com nossa equipe de suporte através do WhatsApp:
             </p>
-            
+
             <div class="contatos-responsaveis">
                 <!-- Contato 1: Maria Alice -->
                 <div class="contato-card">
                     <div class="nome-responsavel">Maria Alice</div>
 
                     <a href="https://wa.me/5591992300743?text=Olá! Tenho uma dúvida sobre o site de reservas do LEP."
-                       target="_blank"
-                       class="link-whatsapp">
+                        target="_blank" class="link-whatsapp">
                         <span class="whatsapp-numero">(91) 99230-0743</span>
                     </a>
                 </div>
-                
+
                 <!-- Contato 2: Eva -->
                 <div class="contato-card">
                     <div class="nome-responsavel">Eva</div>
 
                     <a href="https://wa.me/5591985317663?text=Olá! Tenho uma dúvida sobre o site de reservas do LEP."
-                       target="_blank"
-                       class="link-whatsapp">
+                        target="_blank" class="link-whatsapp">
                         <span class="whatsapp-numero">(91) 98531-7663</span>
                     </a>
                 </div>
             </div>
-            
+
             <p style="text-align: center; margin-top: 20px; color: #777; font-size: 0.9rem;">
                 ⏰ Horário de atendimento: Segunda a Sexta, das 8h às 17h
             </p>
@@ -237,17 +235,14 @@
                     placeholder="Exemplo: Ministrar aula de Matemática Aplicada"></textarea>
 
                 <label for="ocupacao">Qual sua ocupação na universidade?</label>
+                <!-- Substitua esta parte (linhas ~128-138 em index.html) -->
                 <select id="ocupacao" name="ocupacao" required>
                     <option value="" disabled selected>Selecione sua ocupação</option>
-                    <option value="portugues">Docente de Português</option>
-                    <option value="espanhol">Docente de Espanhol</option>
-                    <option value="matematica">Docente de Matemática</option>
-                    <option value="pedagogia">Docente de Pedagogia</option>
-                    <option value="historia">Docente de História</option>
-                    <option value="fisica">Docente de Física</option>
-                    <option value="engenharia">Docente de Engenharia de Produção</option>
-                    <option value="posgraduacao">Docente de Pós Graduação</option>
-                    <option value="estudante">Discente de Engenharia de Produção</option>
+                    <option value="docente_fei">Docente da FEI</option>
+                    <option value="docente_outros">Docente de outros cursos</option>
+                    <option value="discente_producao">Discente de Produção</option>
+                    <option value="tecnico_administrativo">Técnico-Administrativo</option>
+                    <option value="usuario_externo">Usuário Externo</option>
                 </select>
 
                 <label>Dias de uso da reserva:</label>
@@ -318,24 +313,24 @@
         </div>
     </div>
 
-<!-- MODAL DE VISUALIZAÇÃO DE RESERVA -->
-<div class="modal" id="modalVisualizacao">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Reserva(s) para <span id="dataVisualizacao"></span></h2>
-            <button type="button" class="close-modal" id="btnFecharVisualizacao">×</button>
-        </div>
-        
-        <div class="reservas-container" id="reservasContainer">
-            <!-- As reservas serão carregadas aqui dinamicamente -->
-        </div>
-        
-        <div class="modal-footer">
-            <button type="button" id="btnNovaReservaMesmaData" class="btn-secondary">Fazer nova reserva</button>
-            <button type="button" id="btnFecharModalVisualizacao" class="btn-primary">Fechar</button>
+    <!-- MODAL DE VISUALIZAÇÃO DE RESERVA -->
+    <div class="modal" id="modalVisualizacao">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Reserva(s) para <span id="dataVisualizacao"></span></h2>
+                <button type="button" class="close-modal" id="btnFecharVisualizacao">×</button>
+            </div>
+
+            <div class="reservas-container" id="reservasContainer">
+                <!-- As reservas serão carregadas aqui dinamicamente -->
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="btnNovaReservaMesmaData" class="btn-secondary">Fazer nova reserva</button>
+                <button type="button" id="btnFecharModalVisualizacao" class="btn-primary">Fechar</button>
+            </div>
         </div>
     </div>
-</div>
     <footer>
         © 2026 - Laboratório de Engenharia de Produção
     </footer>

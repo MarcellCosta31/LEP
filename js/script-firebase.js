@@ -105,21 +105,17 @@ function converterDataFirestoreParaLocal(timestamp) {
     return null;
 }
 
-// 🔧 FUNÇÃO PARA FORMATAR OCUPAÇÃO
+// Atualize esta função (linhas ~81-98 em script-firebase.js)
 function formatarOcupacao(ocupacao) {
     if (!ocupacao) return 'Não informada';
     
     // Mapeamento de valores do select para textos mais amigáveis
     const ocupacoesFormatadas = {
-        'portugues': 'Docente de Português',
-        'espanhol': 'Docente de Espanhol',
-        'matematica': 'Docente de Matemática',
-        'pedagogia': 'Docente de Pedagogia',
-        'historia': 'Docente de História',
-        'fisica': 'Docente de Física',
-        'engenharia': 'Docente de Engenharia de Produção',
-        'posgraduacao': 'Docente de Pós Graduação',
-        'estudante': 'Discente de Engenharia de Produção'
+        'docente_fei': 'Docente da FEI',
+        'docente_outros': 'Docente de outros cursos',
+        'discente_producao': 'Discente de Produção',
+        'tecnico_administrativo': 'Técnico-Administrativo',
+        'usuario_externo': 'Usuário Externo'
     };
     
     return ocupacoesFormatadas[ocupacao] || ocupacao;
