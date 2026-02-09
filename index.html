@@ -265,7 +265,7 @@
 
                 <!-- Substitua a parte do formulário com os turnos por: -->
                 <label>Qual(is) turno(s) da sua reserva?</label>
-                <div class="checkbox-group">
+                <div class="checkbox-group" id="turnosContainer">
                     <label class="checkbox-option">
                         <input type="checkbox" name="turno" value="manha" class="turno-checkbox">
                         <span>Manhã</span>
@@ -274,6 +274,34 @@
                         <input type="checkbox" name="turno" value="tarde" class="turno-checkbox">
                         <span>Tarde</span>
                     </label>
+                    <!-- Turno da noite - aparecerá apenas para docentes da FEI -->
+                    <label class="checkbox-option" id="noiteContainer" style="display: none;">
+                        <input type="checkbox" name="turno" value="noite" class="turno-checkbox turno-noite">
+                        <span>Noite</span>
+                    </label>
+                </div>
+
+                <!-- Campo de justificativa para turno da noite -->
+                <div id="justificativaNoiteContainer" style="display: none; margin-top: 10px; width: 100%;">
+                    <label for="justificativaNoite"
+                        style="display: block; margin-bottom: 8px; font-weight: bold; color: #003366;">
+                        Justificativa para uso do turno da noite *
+                    </label>
+                    <textarea id="justificativaNoite" name="justificativaNoite" rows="4"
+                        placeholder="Descreva o motivo da necessidade do turno da noite (ex: disponibilidade dos alunos, necessidade de equipamentos específicos, etc.)"
+                        style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; line-height: 1.5; resize: vertical; box-sizing: border-box;"></textarea>
+                    <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">
+                        Este campo é obrigatório quando seleciona o turno da noite. Mínimo 10 caracteres.
+                    </p>
+                </div>
+                <!-- Mensagem informativa para turno da noite -->
+                <div id="mensagemAnaliseNoite"
+                    style="display: none; background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin-top: 10px; border-radius: 4px;">
+                    <p style="margin: 0; color: #856404; font-size: 0.9rem;">
+                        ⚠️ <strong>Reserva sujeita à aprovação:</strong> Reservas no turno da noite não são aprovadas
+                        automaticamente.
+                        Será necessária análise pelos responsáveis do LEP, que entrarão em contato para confirmação.
+                    </p>
                 </div>
                 <label>Você está ciente e se responsabiliza pelos cumprimentos das regras e normas referentes ao uso do
                     Laboratório de Engenharia de Produção?</label>
@@ -289,17 +317,39 @@
                 </div>
 
                 <div class="legenda-disponibilidade">
-                    <div class="item-legenda">
-                        <div class="cor-legenda cor-manha"></div>
-                        <span>Manhã ocupada</span>
+                    <div class="legenda-disponibilidade">
+                        <div class="item-legenda">
+                            <div class="cor-legenda cor-manha"></div>
+                            <span>Manhã ocupada</span>
+                        </div>
+                        <div class="item-legenda">
+                            <div class="cor-legenda cor-tarde"></div>
+                            <span>Tarde ocupada</span>
+                        </div>
+                        <div class="item-legenda">
+                            <div class="cor-legenda cor-indisponivel"></div>
+                            <span>Indisponível</span>
+                        </div>
                     </div>
-                    <div class="item-legenda">
-                        <div class="cor-legenda cor-tarde"></div>
-                        <span>Tarde ocupada</span>
-                    </div>
-                    <div class="item-legenda">
-                        <div class="cor-legenda cor-indisponivel"></div>
-                        <span>Indisponível</span>
+
+                    <!-- 🔧 ADICIONE ESTA LEGENDA DE FERIADOS -->
+                    <div class="legenda-feriados">
+                        <div class="legenda-feriado-item">
+                            <div class="cor-feriado cor-feriado-nacional"></div>
+                            <span>Feriado Nacional</span>
+                        </div>
+                        <div class="legenda-feriado-item">
+                            <div class="cor-feriado cor-feriado-estadual"></div>
+                            <span>Feriado Estadual</span>
+                        </div>
+                        <div class="legenda-feriado-item">
+                            <div class="cor-feriado cor-ponto-facultativo"></div>
+                            <span>Ponto Facultativo</span>
+                        </div>
+                        <div class="legenda-feriado-item">
+                            <div class="cor-feriado cor-ponto-facultativo-12h"></div>
+                            <span>Ponto até 12h</span>
+                        </div>
                     </div>
                 </div>
 
@@ -335,12 +385,16 @@
         © 2026 - Laboratório de Engenharia de Produção
     </footer>
 
+         <script src="js/telegram-notificacao.js"></script>
+
     <!-- 🔥 SCRIPTS DO FIREBASE (VERSÃO COMPATÍVEL COM NAVEGADOR) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <!-- SEU SCRIPT COM FIREBASE -->
+
     <script src="js/script-firebase.js"></script>
+
 
 </body>
 

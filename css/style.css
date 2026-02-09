@@ -2680,3 +2680,470 @@ footer {
     }
 }
 
+/* ==================== */
+/* ESTILOS PARA FERIADOS E PONTOS FACULTATIVOS */
+/* ==================== */
+
+/* Estilos gerais para dias de feriado */
+.calendario-grid .dia.feriado {
+    background-color: rgba(255, 0, 0, 0.08) !important;
+    border: 2px solid rgba(255, 0, 0, 0.3) !important;
+    position: relative;
+    color: #cc0000;
+}
+
+.calendario-grid .dia.ponto-facultativo {
+    background-color: rgba(255, 165, 0, 0.08) !important;
+    border: 2px solid rgba(255, 165, 0, 0.3) !important;
+    position: relative;
+    color: #996300;
+}
+
+.calendario-grid .dia.ponto-facultativo-12h {
+    background-color: rgba(255, 215, 0, 0.08) !important;
+    border: 2px solid rgba(255, 215, 0, 0.3) !important;
+    position: relative;
+    color: #8b7500;
+}
+
+/* Indicador de feriado no número do dia */
+.calendario-grid .dia.feriado .dia-numero,
+.calendario-grid .dia.ponto-facultativo .dia-numero,
+.calendario-grid .dia.ponto-facultativo-12h .dia-numero {
+    font-weight: bold;
+    position: relative;
+}
+
+/* Triângulo indicador no canto superior direito */
+.calendario-grid .dia.feriado::before,
+.calendario-grid .dia.ponto-facultativo::before,
+.calendario-grid .dia.ponto-facultativo-12h::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 15px 15px 0;
+    z-index: 1;
+}
+
+.calendario-grid .dia.feriado::before {
+    border-color: transparent #cc0000 transparent transparent;
+}
+
+.calendario-grid .dia.ponto-facultativo::before {
+    border-color: transparent #ffa500 transparent transparent;
+}
+
+.calendario-grid .dia.ponto-facultativo-12h::before {
+    border-color: transparent #ffd700 transparent transparent;
+}
+
+/* Texto sobre o triângulo */
+.calendario-grid .dia.feriado::after,
+.calendario-grid .dia.ponto-facultativo::after,
+.calendario-grid .dia.ponto-facultativo-12h::after {
+    content: attr(data-feriado-tipo);
+    position: absolute;
+    top: 1px;
+    right: 0;
+    font-size: 7px;
+    font-weight: bold;
+    color: white;
+    transform: rotate(45deg);
+    transform-origin: top right;
+    z-index: 2;
+    white-space: nowrap;
+}
+
+.calendario-grid .dia.feriado::after {
+    content: 'FERIADO';
+}
+
+.calendario-grid .dia.ponto-facultativo::after {
+    content: 'FACULT';
+}
+
+.calendario-grid .dia.ponto-facultativo-12h::after {
+    content: 'ATÉ 12H';
+}
+
+/* Informações de feriado na área de informações do dia */
+.feriado-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3px;
+    margin-top: 2px;
+}
+
+.feriado-icon {
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+}
+
+.feriado-texto {
+    font-size: 0.7rem;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.calendario-grid .dia.feriado .feriado-texto {
+    color: #cc0000;
+}
+
+.calendario-grid .dia.ponto-facultativo .feriado-texto {
+    color: #996300;
+}
+
+.calendario-grid .dia.ponto-facultativo-12h .feriado-texto {
+    color: #8b7500;
+}
+
+/* Modal de visualização - informações de feriado */
+.aviso-feriado {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.aviso-feriado.feriado,
+.aviso-feriado.feriado_estadual {
+    background-color: rgba(255, 0, 0, 0.08);
+    border-left: 4px solid #cc0000;
+}
+
+.aviso-feriado.ponto_facultativo {
+    background-color: rgba(255, 165, 0, 0.08);
+    border-left: 4px solid #ffa500;
+}
+
+.aviso-feriado.ponto_facultativo_12h {
+    background-color: rgba(255, 215, 0, 0.08);
+    border-left: 4px solid #ffd700;
+}
+
+.info-feriado {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.feriado-icon-large {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.feriado-content {
+    flex: 1;
+}
+
+.feriado-content strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+}
+
+.feriado-content p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.4;
+}
+
+/* Aviso no mini calendário do modal de reserva */
+.dia-mini.feriado,
+.dia-mini.ponto-facultativo,
+.dia-mini.ponto-facultativo-12h {
+    position: relative;
+    cursor: not-allowed !important;
+}
+
+.dia-mini.feriado {
+    background-color: rgba(255, 0, 0, 0.1) !important;
+    color: #cc0000 !important;
+    border-color: #cc0000 !important;
+}
+
+.dia-mini.ponto-facultativo {
+    background-color: rgba(255, 165, 0, 0.1) !important;
+    color: #996300 !important;
+    border-color: #ffa500 !important;
+}
+
+.dia-mini.ponto-facultativo-12h {
+    background-color: rgba(255, 215, 0, 0.1) !important;
+    color: #8b7500 !important;
+    border-color: #ffd700 !important;
+}
+
+/* Indicador no mini calendário */
+.dia-mini.feriado::after,
+.dia-mini.ponto-facultativo::after,
+.dia-mini.ponto-facultativo-12h::after {
+    content: '✗';
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 8px;
+    font-weight: bold;
+    color: #ff3333;
+    background: white;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+/* Tooltip melhorado */
+.dia-mini[title] {
+    position: relative;
+}
+
+.dia-mini[title]:hover::before {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 1000;
+    margin-bottom: 5px;
+}
+
+.dia-mini[title]:hover::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+    margin-bottom: 0;
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsividade para informações de feriado */
+@media (max-width: 768px) {
+    .calendario-grid .dia.feriado::after,
+    .calendario-grid .dia.ponto-facultativo::after,
+    .calendario-grid .dia.ponto-facultativo-12h::after {
+        font-size: 6px;
+    }
+    
+    .feriado-info {
+        display: none; /* Oculta em telas pequenas para economizar espaço */
+    }
+    
+    .info-feriado {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .feriado-icon-large {
+        align-self: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendario-grid .dia.feriado::before,
+    .calendario-grid .dia.ponto-facultativo::before,
+    .calendario-grid .dia.ponto-facultativo-12h::before {
+        border-width: 0 12px 12px 0;
+    }
+    
+    .calendario-grid .dia.feriado::after,
+    .calendario-grid .dia.ponto-facultativo::after,
+    .calendario-grid .dia.ponto-facultativo-12h::after {
+        font-size: 5px;
+    }
+}
+
+/* Legenda para feriados na interface */
+.legenda-feriados {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    font-size: 0.8rem;
+}
+
+.legenda-feriado-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.cor-feriado {
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+}
+
+.cor-feriado-nacional {
+    background-color: rgba(255, 0, 0, 0.2);
+    border: 1px solid #cc0000;
+}
+
+.cor-feriado-estadual {
+    background-color: rgba(139, 0, 0, 0.2);
+    border: 1px solid #8b0000;
+}
+
+.cor-ponto-facultativo {
+    background-color: rgba(255, 165, 0, 0.2);
+    border: 1px solid #ffa500;
+}
+
+.cor-ponto-facultativo-12h {
+    background-color: rgba(255, 215, 0, 0.2);
+    border: 1px solid #ffd700;
+}
+
+/* Estilos específicos para turno da noite */
+.turno-noite:checked + span {
+    color: #8B008B;
+    font-weight: bold;
+}
+
+.ocupado-noite {
+    background-color: rgba(139, 0, 139, 0.1) !important;
+    border-left: 4px solid #8B008B !important;
+}
+
+.calendario-grid .dia.ocupado-noite::before {
+    content: 'N';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #8B008B;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Para card de reserva da noite */
+.reserva-card.noite {
+    border-top: 4px solid #8B008B;
+}
+
+.turno-icon.noite {
+    background-color: #8B008B;
+}
+
+/* Legenda para turno da noite */
+.cor-noite {
+    background-color: rgba(139, 0, 139, 0.2);
+    border: 1px solid #8B008B;
+}
+
+/* Ajustes para ocupação noite+outros */
+.calendario-grid .dia.ocupado-manha-noite {
+    background: linear-gradient(135deg, rgba(0, 74, 173, 0.1) 50%, rgba(139, 0, 139, 0.1) 50%) !important;
+}
+
+.calendario-grid .dia.ocupado-tarde-noite {
+    background: linear-gradient(135deg, rgba(255, 165, 0, 0.1) 50%, rgba(139, 0, 139, 0.1) 50%) !important;
+}
+
+.calendario-grid .dia.ocupado-ambos-noite {
+    background: linear-gradient(135deg, 
+        rgba(0, 74, 173, 0.1) 33%, 
+        rgba(255, 165, 0, 0.1) 33% 66%, 
+        rgba(139, 0, 139, 0.1) 66%) !important;
+}
+
+/* Para mini calendário */
+.dia-mini.selecionado-noite {
+    background-color: rgba(139, 0, 139, 0.2);
+    border: 2px solid rgba(139, 0, 139, 0.5);
+}
+
+/* Aumentar largura do campo de justificativa do turno da noite */
+#justificativaNoite {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    font-size: 1rem;
+    line-height: 1.5;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+#justificativaNoite:focus {
+    outline: none;
+    border-color: #8B008B;
+    box-shadow: 0 0 0 2px rgba(139, 0, 139, 0.2);
+}
+
+/* Container do campo de justificativa */
+#justificativaNoiteContainer {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+#justificativaNoiteContainer label {
+    font-weight: bold;
+    color: #8B008B;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 0.95rem;
+}
+
+/* Texto de explicação abaixo do campo */
+#justificativaNoiteContainer p {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* Estilo específico para o texto da justificativa */
+.justificativa-texto {
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 3px solid #8B008B;
+    margin-top: 5px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
