@@ -31,7 +31,7 @@ async function carregarScriptTelegram() {
 // 🔧 FUNÇÃO ALTERNATIVA PARA ENVIAR NOTIFICAÇÃO TELEGRAM
 async function enviarNotificacaoTelegram(reserva) {
     const TOKEN = "8599499895:AAGWYnpH6UFm0m89WblXlQpgOtQZeAAuZwQ";
-    const CHAT_ID = "-5210877123";
+    const CHAT_ID = "-1003832202230";
     
     // Formatar o turno para exibição
     const formatarTurno = (turno) => {

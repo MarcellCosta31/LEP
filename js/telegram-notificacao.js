@@ -1,17 +1,13 @@
-// telegram-notificacao.js - VERSÃO PARA GITHUB PAGES
+// telegram-notificacao.js - VERSÃO PARA GRUPO
 
 async function notificarTelegram(reserva) {
   const TOKEN = "8599499895:AAGWYnpH6UFm0m89WblXlQpgOtQZeAAuZwQ";
-  const CHAT_ID = "-5210877123";
   
-  // 🔧 URL alternativa para contornar CORS no GitHub Pages
-  const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
+  // 🔧 SUBSTITUA ESTE CHAT_ID PELO DO SEU GRUPO!
+  // Exemplo: "-1001234567890" para grupos
+  const CHAT_ID_DO_GRUPO = "-1003832202230"; // ⬅️ SUBSTITUA PELO ID DO SEU GRUPO
+  const CHAT_ID_PRIVADO = "8040576945"; // Mantém o privado também se quiser
   
-  // 🔧 Proxy CORS para GitHub Pages (opcional)
-  const CORS_PROXY = "https://cors-anywhere.herokuapp.com/";
-  // OU use: "https://api.allorigins.win/raw?url="
-  // OU use: "https://thingproxy.freeboard.io/fetch/"
-
   console.log('🔔 Iniciando notificação Telegram...');
 
   // Formatar o turno para exibição
@@ -84,18 +80,18 @@ ${reserva.justificativaNoite ? `📝 *Justificativa:* ${justificativaTruncada}` 
   console.log('Mensagem formatada:', mensagem);
 
   try {
-    // 🔧 TENTATIVA 1: Direto (pode falhar no GitHub Pages)
-    console.log('📤 Tentando conexão direta...');
-    
+    // 🔧 ENVIAR PARA O GRUPO (prioridade)
     const payload = {
-      chat_id: CHAT_ID,
+      chat_id: CHAT_ID_DO_GRUPO, // Usando o grupo agora
       text: mensagem,
       parse_mode: "Markdown"
     };
 
-    // Primeiro tentar direto
+    console.log(`📤 Enviando para GRUPO (ID: ${CHAT_ID_DO_GRUPO})...`);
+    
+    // TENTATIVA 1: Envio direto para o grupo
     try {
-      const response = await fetch(TELEGRAM_API, {
+      const response = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -104,152 +100,196 @@ ${reserva.justificativaNoite ? `📝 *Justificativa:* ${justificativaTruncada}` 
         body: JSON.stringify(payload)
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log('✅ Notificação enviada com sucesso!', result);
-        return true;
-      }
-      console.log('❌ Falha direta, tentando com proxy...');
-    } catch (directError) {
-      console.log('🌐 Erro direto (provavelmente CORS):', directError.message);
-    }
-
-    // 🔧 TENTATIVA 2: Com proxy CORS
-    console.log('🔄 Tentando com proxy CORS...');
-    
-    try {
-      // Usar proxy para contornar CORS
-      const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(TELEGRAM_API);
+      const result = await response.json();
       
-      const response = await fetch(proxyUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify(payload),
-        mode: 'cors' // Importante para GitHub Pages
-      });
-
       if (response.ok) {
-        const result = await response.json();
-        console.log('✅ Notificação enviada via proxy!', result);
+        console.log(`✅ Notificação enviada para o GRUPO com sucesso!`);
+        
+        // 🔧 OPÇÃO: Também enviar para o chat privado (se quiser)
+        // await enviarParaChatPrivado(reserva, mensagem);
+        
         return true;
       } else {
-        const errorText = await response.text();
-        console.error('❌ Erro com proxy:', errorText);
+        console.error('❌ Erro ao enviar para grupo:', result);
+        
+        // Se falhar no grupo, tentar no privado como fallback
+        if (result.description && result.description.includes('chat not found')) {
+          console.log('🔄 Grupo não encontrado, tentando chat privado...');
+          return await enviarParaChatPrivado(reserva, mensagem, TOKEN, CHAT_ID_PRIVADO);
+        }
       }
-    } catch (proxyError) {
-      console.error('❌ Erro com proxy CORS:', proxyError);
+    } catch (directError) {
+      console.error('❌ Erro de conexão com grupo:', directError);
+      
+      // Fallback para chat privado
+      console.log('🔄 Tentando chat privado como fallback...');
+      return await enviarParaChatPrivado(reserva, mensagem, TOKEN, CHAT_ID_PRIVADO);
     }
-
-    // 🔧 TENTATIVA 3: FormData approach (às vezes funciona melhor)
-    console.log('🔧 Tentando método alternativo...');
-    
-    try {
-      // Converter para FormData (às vezes contorna CORS)
-      const formData = new FormData();
-      formData.append('chat_id', CHAT_ID);
-      formData.append('text', mensagem);
-      formData.append('parse_mode', 'Markdown');
-      
-      const response = await fetch(TELEGRAM_API, {
-        method: "POST",
-        body: formData,
-        mode: 'no-cors' // Modo no-cors para requests simples
-      });
-      
-      console.log('📨 Enviado via FormData (no-cors)');
-      // Não podemos ler a resposta em modo no-cors, mas o request foi enviado
-      return true;
-      
-    } catch (formDataError) {
-      console.error('❌ Erro com FormData:', formDataError);
-    }
-
-    console.error('❌ Todas as tentativas falharam');
-    return false;
 
   } catch (error) {
     console.error('❌ Erro crítico ao enviar para Telegram:', error);
+    
+    // Última tentativa: chat privado
+    try {
+      console.log('🔄 Última tentativa: chat privado...');
+      return await enviarParaChatPrivado(reserva, mensagem, TOKEN, CHAT_ID_PRIVADO);
+    } catch (finalError) {
+      console.error('❌ Todas as tentativas falharam:', finalError);
+      return false;
+    }
+  }
+}
+
+// 🔧 FUNÇÃO AUXILIAR para enviar para chat privado
+async function enviarParaChatPrivado(reserva, mensagem, token, chatIdPrivado) {
+  try {
+    console.log(`📤 Enviando para chat privado (ID: ${chatIdPrivado})...`);
+    
+    const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatIdPrivado,
+        text: `[FALLBACK] ${mensagem}`,
+        parse_mode: "Markdown"
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (response.ok) {
+      console.log('✅ Enviado para chat privado (fallback)');
+      return true;
+    } else {
+      console.error('❌ Falha também no chat privado:', result);
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Erro no fallback privado:', error);
     return false;
   }
 }
 
-// 🔧 FUNÇÃO ALTERNATIVA usando JSONP (para GitHub Pages)
-function notificarTelegramJSONP(reserva) {
-  return new Promise((resolve) => {
-    console.log('🔔 Usando método JSONP para Telegram...');
+// 🔧 FUNÇÃO PARA TESTAR O GRUPO
+async function testarGrupoTelegram() {
+  const TOKEN = "8599499895:AAGWYnpH6UFm0m89WblXlQpgOtQZeAAuZwQ";
+  
+  // Primeiro descubra o chat ID do grupo
+  console.log('🔍 Buscando informações do grupo...');
+  
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${TOKEN}/getUpdates`);
+    const result = await response.json();
     
-    // Criar callback única
-    const callbackName = 'telegramCallback_' + Date.now();
-    
-    // Construir mensagem simplificada
-    const mensagem = `NOVA RESERVA: ${reserva.responsavel} - ${reserva.turno} - ${reserva.dias ? reserva.dias[0] : ''}`;
-    
-    // URL Telegram com JSONP
-    const TOKEN = "8599499895:AAGWYnpH6UFm0m89WblXlQpgOtQZeAAuZwQ";
-    const CHAT_ID = "8040576945";
-    
-    const url = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(mensagem)}&parse_mode=Markdown&callback=${callbackName}`;
-    
-    // Criar script tag
-    const script = document.createElement('script');
-    script.src = url;
-    
-    // Definir callback global
-    window[callbackName] = function(response) {
-      console.log('📨 Resposta JSONP:', response);
-      delete window[callbackName];
-      document.body.removeChild(script);
-      resolve(true);
-    };
-    
-    // Adicionar ao documento
-    document.body.appendChild(script);
-    
-    // Timeout
-    setTimeout(() => {
-      if (window[callbackName]) {
-        delete window[callbackName];
-        document.body.removeChild(script);
-        console.log('⏰ Timeout JSONP');
-        resolve(false);
+    if (result.ok && result.result.length > 0) {
+      const grupos = result.result.filter(update => 
+        update.message && 
+        (update.message.chat.type === 'group' || update.message.chat.type === 'supergroup')
+      );
+      
+      if (grupos.length > 0) {
+        console.log('🎯 GRUPOS ENCONTRADOS:');
+        grupos.forEach((grupo, index) => {
+          const chat = grupo.message.chat;
+          console.log(`\n${index + 1}. ${chat.title}`);
+          console.log(`   ID do Grupo: ${chat.id}`);
+          console.log(`   Tipo: ${chat.type}`);
+          
+          // Testar envio para este grupo
+          console.log(`   🔧 Testando envio...`);
+          
+          fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: chat.id,
+              text: `✅ Teste de notificação do LEP\nEste grupo está configurado corretamente!\n${new Date().toLocaleString('pt-BR')}`,
+              parse_mode: "Markdown"
+            })
+          })
+          .then(r => r.json())
+          .then(r => console.log(`   Resultado: ${r.ok ? '✅ Sucesso' : '❌ Falha'}`))
+          .catch(e => console.log(`   Erro: ${e.message}`));
+        });
+      } else {
+        console.log('⚠️ Nenhum grupo encontrado.');
+        console.log('   Para configurar:');
+        console.log('   1. Crie um grupo no Telegram');
+        console.log('   2. Adicione @reservas_lep_bot ao grupo');
+        console.log('   3. Envie qualquer mensagem no grupo');
+        console.log('   4. Execute esta função novamente');
       }
-    }, 5000);
-  });
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+  }
 }
 
-// 🔧 FUNÇÃO UNIFICADA que tenta todos os métodos
-async function enviarNotificacaoTelegramUnificado(reserva) {
-  console.log('🔔 Enviando notificação (método unificado)...');
+// 🔧 FUNÇÃO PARA CONFIGURAR AUTOMATICAMENTE
+async function configurarGrupoAutomatico() {
+  const TOKEN = "8599499895:AAGWYnpH6UFm0m89WblXlQpgOtQZeAAuZwQ";
   
-  // Tentar método principal primeiro
+  console.log('⚙️ Configurando grupo automaticamente...');
+  
   try {
-    const resultado = await notificarTelegram(reserva);
-    if (resultado) return true;
+    // Buscar updates
+    const response = await fetch(`https://api.telegram.org/bot${TOKEN}/getUpdates`);
+    const result = await response.json();
+    
+    if (result.ok && result.result.length > 0) {
+      // Encontrar o primeiro grupo
+      const grupo = result.result.find(update => 
+        update.message && 
+        (update.message.chat.type === 'group' || update.message.chat.type === 'supergroup')
+      );
+      
+      if (grupo) {
+        const chatIdGrupo = grupo.message.chat.id;
+        console.log(`✅ Grupo encontrado: ${grupo.message.chat.title}`);
+        console.log(`✅ Chat ID do grupo: ${chatIdGrupo}`);
+        
+        // Atualizar o script com o novo chat ID
+        console.log('📝 Atualizando script com novo Chat ID...');
+        
+        // Criar um novo script com o chat ID correto
+        const novoScript = `
+// Configuração atualizada
+const CHAT_ID_DO_GRUPO = "${chatIdGrupo}";
+console.log('✅ Grupo configurado:', CHAT_ID_DO_GRUPO);
+
+// Testar envio
+fetch('https://api.telegram.org/bot${TOKEN}/sendMessage', {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    chat_id: "${chatIdGrupo}",
+    text: "✅ Grupo configurado com sucesso!\\nTodas as novas reservas serão notificadas aqui.\\n${new Date().toLocaleString('pt-BR')}",
+    parse_mode: "Markdown"
+  })
+});
+        `;
+        
+        console.log('\n📋 COLE ESTE CÓDIGO NO telegram-notificacao.js:');
+        console.log('='.repeat(50));
+        console.log(`const CHAT_ID_DO_GRUPO = "${chatIdGrupo}";`);
+        console.log('='.repeat(50));
+        
+        return chatIdGrupo;
+      } else {
+        console.log('❌ Nenhum grupo encontrado nos updates.');
+      }
+    }
   } catch (error) {
-    console.log('❌ Método principal falhou:', error);
+    console.error('Erro:', error);
   }
-  
-  // Se falhar, tentar JSONP (funciona em mais lugares)
-  try {
-    const resultadoJSONP = await notificarTelegramJSONP(reserva);
-    return resultadoJSONP;
-  } catch (error) {
-    console.log('❌ Método JSONP também falhou:', error);
-  }
-  
-  // Se tudo falhar, pelo menos logar no console
-  console.log('📋 Reserva que não foi notificada:', reserva);
-  return false;
 }
 
 // Exportar para uso global
 if (typeof window !== 'undefined') {
   window.notificarTelegram = notificarTelegram;
-  window.notificarTelegramJSONP = notificarTelegramJSONP;
-  window.enviarNotificacaoTelegramUnificado = enviarNotificacaoTelegramUnificado;
+  window.testarGrupoTelegram = testarGrupoTelegram;
+  window.configurarGrupoAutomatico = configurarGrupoAutomatico;
   
-  console.log('✅ Funções Telegram carregadas para GitHub Pages');
+  console.log('✅ Funções Telegram carregadas');
+  console.log('💡 Use testarGrupoTelegram() para configurar');
 }
