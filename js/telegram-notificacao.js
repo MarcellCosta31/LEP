@@ -1,8 +1,16 @@
-// telegram-notificacao.js - VERSÃO FINAL (JÁ TESTADA E FUNCIONANDO)
+// telegram-notificacao.js - VERSÃO PARA GITHUB PAGES
 
 async function notificarTelegram(reserva) {
   const TOKEN = "8599499895:AAGWYnpH6UFm0m89WblXlQpgOtQZeAAuZwQ";
-  const CHAT_ID = "8040576945"; // Este está CORRETO e funcionando!
+  const CHAT_ID = "8040576945";
+  
+  // 🔧 URL alternativa para contornar CORS no GitHub Pages
+  const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
+  
+  // 🔧 Proxy CORS para GitHub Pages (opcional)
+  const CORS_PROXY = "https://cors-anywhere.herokuapp.com/";
+  // OU use: "https://api.allorigins.win/raw?url="
+  // OU use: "https://thingproxy.freeboard.io/fetch/"
 
   console.log('🔔 Iniciando notificação Telegram...');
 
@@ -76,92 +84,172 @@ ${reserva.justificativaNoite ? `📝 *Justificativa:* ${justificativaTruncada}` 
   console.log('Mensagem formatada:', mensagem);
 
   try {
-    // Enviar com Markdown (agora sabemos que funciona)
-    const response = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        chat_id: CHAT_ID,
-        text: mensagem,
-        parse_mode: "Markdown" // Usando Markdown normal
-      })
-    });
-
-    const result = await response.json();
+    // 🔧 TENTATIVA 1: Direto (pode falhar no GitHub Pages)
+    console.log('📤 Tentando conexão direta...');
     
-    if (!response.ok) {
-      console.error('❌ Erro na resposta do Telegram:', result);
-      
-      // Fallback: tentar sem formatação
-      console.log('🔄 Tentando sem formatação...');
-      
-      const mensagemSemFormatacao = mensagem
-        .replace(/\*/g, '') // Remover asteriscos
-        .replace(/📅/g, '📅')
-        .replace(/👤/g, '👤')
-        .replace(/📧/g, '📧')
-        .replace(/📱/g, '📱')
-        .replace(/🕒/g, '🕒')
-        .replace(/📆/g, '📆')
-        .replace(/📋/g, '📋')
-        .replace(/🎯/g, '🎯')
-        .replace(/⚠️/g, '⚠️')
-        .replace(/✅/g, '✅')
-        .replace(/📝/g, '📝')
-        .replace(/📊/g, '📊')
-        .replace(/⏰/g, '⏰');
-      
-      const responseFallback = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+    const payload = {
+      chat_id: CHAT_ID,
+      text: mensagem,
+      parse_mode: "Markdown"
+    };
+
+    // Primeiro tentar direto
+    try {
+      const response = await fetch(TELEGRAM_API, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: mensagemSemFormatacao
-        })
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Notificação enviada com sucesso!', result);
+        return true;
+      }
+      console.log('❌ Falha direta, tentando com proxy...');
+    } catch (directError) {
+      console.log('🌐 Erro direto (provavelmente CORS):', directError.message);
+    }
+
+    // 🔧 TENTATIVA 2: Com proxy CORS
+    console.log('🔄 Tentando com proxy CORS...');
+    
+    try {
+      // Usar proxy para contornar CORS
+      const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(TELEGRAM_API);
+      
+      const response = await fetch(proxyUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(payload),
+        mode: 'cors' // Importante para GitHub Pages
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Notificação enviada via proxy!', result);
+        return true;
+      } else {
+        const errorText = await response.text();
+        console.error('❌ Erro com proxy:', errorText);
+      }
+    } catch (proxyError) {
+      console.error('❌ Erro com proxy CORS:', proxyError);
+    }
+
+    // 🔧 TENTATIVA 3: FormData approach (às vezes funciona melhor)
+    console.log('🔧 Tentando método alternativo...');
+    
+    try {
+      // Converter para FormData (às vezes contorna CORS)
+      const formData = new FormData();
+      formData.append('chat_id', CHAT_ID);
+      formData.append('text', mensagem);
+      formData.append('parse_mode', 'Markdown');
+      
+      const response = await fetch(TELEGRAM_API, {
+        method: "POST",
+        body: formData,
+        mode: 'no-cors' // Modo no-cors para requests simples
       });
       
-      const resultFallback = await responseFallback.json();
+      console.log('📨 Enviado via FormData (no-cors)');
+      // Não podemos ler a resposta em modo no-cors, mas o request foi enviado
+      return true;
       
-      if (!responseFallback.ok) {
-        console.error('❌ Falha também no fallback:', resultFallback);
-      } else {
-        console.log('✅ Notificação enviada (sem formatação)');
-      }
-    } else {
-      console.log('✅ Notificação enviada com sucesso!');
-      console.log('Resultado:', result);
+    } catch (formDataError) {
+      console.error('❌ Erro com FormData:', formDataError);
     }
+
+    console.error('❌ Todas as tentativas falharam');
+    return false;
+
   } catch (error) {
-    console.error('❌ Erro ao enviar para Telegram:', error);
-    // Não interrompe o fluxo principal
+    console.error('❌ Erro crítico ao enviar para Telegram:', error);
+    return false;
   }
+}
+
+// 🔧 FUNÇÃO ALTERNATIVA usando JSONP (para GitHub Pages)
+function notificarTelegramJSONP(reserva) {
+  return new Promise((resolve) => {
+    console.log('🔔 Usando método JSONP para Telegram...');
+    
+    // Criar callback única
+    const callbackName = 'telegramCallback_' + Date.now();
+    
+    // Construir mensagem simplificada
+    const mensagem = `NOVA RESERVA: ${reserva.responsavel} - ${reserva.turno} - ${reserva.dias ? reserva.dias[0] : ''}`;
+    
+    // URL Telegram com JSONP
+    const TOKEN = "8599499895:AAGWYnpH6UFm0m89WblXlQpgOtQZeAAuZwQ";
+    const CHAT_ID = "8040576945";
+    
+    const url = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(mensagem)}&parse_mode=Markdown&callback=${callbackName}`;
+    
+    // Criar script tag
+    const script = document.createElement('script');
+    script.src = url;
+    
+    // Definir callback global
+    window[callbackName] = function(response) {
+      console.log('📨 Resposta JSONP:', response);
+      delete window[callbackName];
+      document.body.removeChild(script);
+      resolve(true);
+    };
+    
+    // Adicionar ao documento
+    document.body.appendChild(script);
+    
+    // Timeout
+    setTimeout(() => {
+      if (window[callbackName]) {
+        delete window[callbackName];
+        document.body.removeChild(script);
+        console.log('⏰ Timeout JSONP');
+        resolve(false);
+      }
+    }, 5000);
+  });
+}
+
+// 🔧 FUNÇÃO UNIFICADA que tenta todos os métodos
+async function enviarNotificacaoTelegramUnificado(reserva) {
+  console.log('🔔 Enviando notificação (método unificado)...');
+  
+  // Tentar método principal primeiro
+  try {
+    const resultado = await notificarTelegram(reserva);
+    if (resultado) return true;
+  } catch (error) {
+    console.log('❌ Método principal falhou:', error);
+  }
+  
+  // Se falhar, tentar JSONP (funciona em mais lugares)
+  try {
+    const resultadoJSONP = await notificarTelegramJSONP(reserva);
+    return resultadoJSONP;
+  } catch (error) {
+    console.log('❌ Método JSONP também falhou:', error);
+  }
+  
+  // Se tudo falhar, pelo menos logar no console
+  console.log('📋 Reserva que não foi notificada:', reserva);
+  return false;
 }
 
 // Exportar para uso global
 if (typeof window !== 'undefined') {
   window.notificarTelegram = notificarTelegram;
-  console.log('✅ Função notificarTelegram carregada e pronta');
-}
-
-// 🔧 FUNÇÃO DE TESTE (para debug)
-if (typeof window !== 'undefined') {
-  window.testarTelegram = async function() {
-    console.log('🧪 Testando função notificarTelegram...');
-    
-    const reservaTeste = {
-      responsavel: "João Silva (TESTE)",
-      email: "joao@teste.com",
-      whatsapp: "(11) 99999-9999",
-      turno: "manha",
-      dias: ["2026-02-20", "2026-02-21"],
-      ocupacao: "docente_fei",
-      finalidade: "Aula de Programação para turma de Engenharia",
-      status: "aprovado",
-      justificativaNoite: ""
-    };
-    
-    await notificarTelegram(reservaTeste);
-  };
+  window.notificarTelegramJSONP = notificarTelegramJSONP;
+  window.enviarNotificacaoTelegramUnificado = enviarNotificacaoTelegramUnificado;
+  
+  console.log('✅ Funções Telegram carregadas para GitHub Pages');
 }

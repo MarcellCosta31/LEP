@@ -2291,6 +2291,17 @@ document.addEventListener('DOMContentLoaded', function () {
     // Encontrar todas as células com o nome "Marcell"
     const celulasMarcell = document.querySelectorAll('.dia-col[data-turno="tarde"]');
 
+    function obterMesAtualFormatado() {
+        const agora = new Date();
+        return agora.toLocaleDateString('pt-BR', {
+            month: 'long',
+            year: 'numeric'
+        });
+    }
+    if (tituloCalendario) {
+        tituloCalendario.textContent = obterMesAtualFormatado();
+    }
+
     // Contador de cliques e timestamp do último clique
     let clickCount = 0;
     let lastClickTime = 0;
