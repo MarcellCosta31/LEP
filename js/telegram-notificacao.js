@@ -2,7 +2,7 @@
 
 async function notificarTelegram(reserva) {
   const TOKEN = "8599499895:AAGWYnpH6UFm0m89WblXlQpgOtQZeAAuZwQ";
-  const CHAT_ID = "8040576945";
+  const CHAT_ID = "-5210877123";
   
   // 🔧 URL alternativa para contornar CORS no GitHub Pages
   const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
@@ -62,7 +62,7 @@ async function notificarTelegram(reserva) {
     : 'Não informada';
   
   const justificativaTruncada = reserva.justificativaNoite 
-    ? (reserva.justificativaNoite.length > 100 ? reserva.justificativaNoite.substring(0, 100) + '...' : reserva.justificativaNoite)
+    ? (reserva.justificativaNoite.length > 500 ? reserva.justificativaNoite.substring(0, 100) + '...' : reserva.justificativaNoite)
     : '';
 
   const mensagem = `📅 *NOVA RESERVA NO LEP*
