@@ -12,16 +12,21 @@
 
 <body>
     <!-- Substituir esta parte no header -->
-    <header class="header">
-        <div class="header-left">
-            <h1>LEP</h1>
-            <span>Reserva do Laboratório de Informática</span>
-        </div>
-        <div class="header-right">
-            <button id="btnAbrirModal">+ Nova Reserva</button>
-            <a href="login.html" class="admin-link">Área Admin</a>
-        </div>
-    </header>
+    <!-- Substitua o header existente no index.html por este -->
+<header class="header">
+    <div class="header-left">
+        <h1>LEP</h1>
+        <span>Reserva do Laboratório de Informática</span>
+    </div>
+    <div class="header-right">
+        <nav class="nav-telas">
+            <a href="index.html" class="nav-link active">🏠 Início</a>
+            <a href="mapa.html" class="nav-link">🗺️ Informações</a>
+        </nav>
+        <button id="btnAbrirModal">+ Nova Reserva</button>
+        <a href="login.html" class="admin-link">Área Admin</a>
+    </div>
+</header>
 
     <main class="container">
         <!-- CALENDÁRIO -->
@@ -36,7 +41,7 @@
                 <div class="view-buttons">
                     <!-- ALTERADO: Mensal agora é ativo por padrão -->
                     <button class="view-btn active" data-view="monthly">Mensal</button>
-                    <button class="view-btn" data-view="weekly">Semanal</button>
+                    <button class="view-btn" data-view="weekly">Bolsistas da Semana</button>
                 </div>
             </div>
 
@@ -65,8 +70,8 @@
                         <div class="hora-col">14h às 17h</div>
                         <div class="dia-col" data-dia="seg" data-turno="tarde">Marcell</div>
                         <div class="dia-col" data-dia="ter" data-turno="tarde">Fernanda</div>
-                        <div class="dia-col" data-dia="qua" data-turno="tarde">Marcell</div>
-                        <div class="dia-col" data-dia="qui" data-turno="tarde">Maria Alice</div>
+                        <div class="dia-col" data-dia="qua" data-turno="tarde">Maria Alice</div>
+                        <div class="dia-col" data-dia="qui" data-turno="tarde">Marcell</div>
                         <div class="dia-col" data-dia="sex" data-turno="tarde">Ronald</div>
                     </div>
                 </div>
@@ -394,6 +399,7 @@
     <!-- SEU SCRIPT COM FIREBASE -->
 
     <script src="js/script-firebase.js"></script>
+
 
 
 </body>

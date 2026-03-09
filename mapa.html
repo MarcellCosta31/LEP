@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEP - Laboratório de Engenharia de Produção</title>
+  <link rel="stylesheet" href="css/mapa.css">
+</head>
+
+<body>
+  <!-- Header estilizado -->
+  <!-- Substitua o header existente no mapa.html por este -->
+<header class="header">
+    <div class="header-left">
+        <h1>LEP</h1>
+        <span>Laboratório de Engenharia de Produção</span>
+    </div>
+    
+    <div class="header-right">
+        <!-- Navegação entre telas -->
+        <nav class="nav-telas">
+            <a href="index.html" class="nav-link">🏠 Início</a>
+            <a href="mapa.html" class="nav-link active">🗺️ Informações</a>
+        </nav>
+    </div>
+</header>
+
+  </header>
+
+  <!-- Main content -->
+  <main>
+    <!-- Hero section com foto do LEP -->
+    <div class="hero-lep">
+      <div class="hero-content">
+        <h1>Laboratório de Engenharia de Produção</h1>
+        <p>Espaço voltado ao desenvolvimento de projetos, pesquisas e aprendizado prático, com computadores e softwares
+          utilizados nas atividades do laboratório.</p>
+        <div class="hero-stats">
+          <div class="stat">
+            <div class="stat-number">20</div>
+            <div class="stat-label">Computadores</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">Seg a Sex</div>
+            <div class="stat-label">Acesso</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">Manhã e Tarde</div>
+            <div class="stat-label">Horário</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-image">
+        <img src="imagens/LEP.png" alt="Laboratório LEP">
+      </div>
+    </div>
+
+    <!-- Seção da Planta da Sala com Ficha Técnica -->
+    <div class="planta-section">
+      <div class="planta-header">
+        <h2 class="planta-title">🗺️ Planta da Sala - LEP</h2>
+      </div>
+
+      <div class="planta-layout">
+        <!-- Mapa -->
+        <div class="mapa-container">
+          <img src="imagens/Planta.png" class="planta-base" alt="Planta do Laboratório">
+          <div class="camada-interativa" id="camadaAssentos"></div>
+        </div>
+
+        <!-- Ficha Técnica -->
+        <div class="ficha-tecnica">
+          <div class="ficha-titulo">
+            <span>📊</span>
+            Ficha Técnica
+          </div>
+
+          <!-- Cards rápidos -->
+          <div class="ficha-grid">
+            <div class="ficha-card">
+              <div class="numero">20</div>
+              <div class="label">Com PC</div>
+            </div>
+            <div class="ficha-card">
+              <div class="numero">10</div>
+              <div class="label">Sem PC</div>
+            </div>
+          </div>
+
+          <!-- Total de lugares -->
+          <div
+            style="text-align: center; margin: 15px 0; padding: 15px; background: rgba(37,99,235,0.2); border-radius: 40px;">
+            <span style="font-size: 14px; opacity: 0.8;">Total de Lugares</span>
+            <div style="font-size: 48px; font-weight: 700; color: #60a5fa;">30</div>
+          </div>
+
+          <div class="ficha-divider"></div>
+
+          <!-- Equipamentos -->
+          <h4 style="margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: #e2e8f0;">
+            <span>📋</span> Equipamentos
+          </h4>
+
+          <div class="equipamento-lista">
+            <div class="equipamento-item">
+              <div class="icone">⬜</div>
+              <span class="nome">Quadros Brancos</span>
+              <span class="qtd">2</span>
+            </div>
+            <div class="equipamento-item">
+              <div class="icone">📺</div>
+              <span class="nome">Televisões</span>
+              <span class="qtd">2</span>
+            </div>
+            <div class="equipamento-item">
+              <div class="icone">🔌</div>
+              <span class="nome">Tomadas/Estação</span>
+              <span class="qtd">2</span>
+            </div>
+            <div class="equipamento-item">
+              <div class="icone">📶</div>
+              <span class="nome">Pontos de Rede</span>
+              <span class="qtd">30</span>
+            </div>
+          </div>
+
+          <div class="ficha-divider"></div>
+
+          <!-- Status em tempo real -->
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/script.js"></script>
+</body>
+
+</html>

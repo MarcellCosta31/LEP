@@ -3147,3 +3147,74 @@ footer {
     white-space: pre-wrap;
     word-wrap: break-word;
 }
+
+/* Adicione esta seção ao seu style.css existente */
+
+/* Navegação entre telas */
+.nav-telas {
+  display: flex;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px;
+  border-radius: 50px;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  padding: 8px 20px;
+  border-radius: 40px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.nav-link.active {
+  background: white;
+  color: #004aad;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Ajuste no header para acomodar a navegação */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* Responsividade para a navegação */
+@media (max-width: 768px) {
+  .nav-telas {
+    width: 100%;
+    justify-content: center;
+    margin-top: 5px;
+  }
+  
+  .nav-link {
+    padding: 6px 15px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-telas {
+    flex-wrap: wrap;
+  }
+  
+  .nav-link {
+    flex: 1;
+    text-align: center;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
