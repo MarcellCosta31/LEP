@@ -1,4 +1,4 @@
-// script-firebase.js - Com verificação de disponibilidade, correção de fuso horário, múltiplos turnos, visualização de reservas, BLOQUEIO DE FERIADOS e TURNO DA NOITE para docentes da FEI
+// script-firebase.js - Com verificação de disponibilidade, correção de fuso horário, múltiplos turnos, visualização de reservas, BLOQUEIO DE FERIADOS, TURNO DA NOITE e BLOQUEIO DE FINAIS DE SEMANA para docentes da FEI
 
 // 🔧 FUNÇÃO PARA CARREGAR SCRIPT DO TELEGRAM DINAMICAMENTE
 async function carregarScriptTelegram() {
@@ -159,6 +159,23 @@ try {
     console.log('✅ Firebase inicializado com sucesso!');
 } catch (error) {
     console.error('❌ Erro ao inicializar Firebase:', error);
+}
+
+// 🔧 FUNÇÃO PARA VERIFICAR SE É FIM DE SEMANA
+function verificarFimDeSemana(dataStr) {
+    const data = parseDataStringLocal(dataStr);
+    if (!data) return { isWeekend: false, diaSemana: null };
+    
+    const diaSemana = data.getDay(); // 0 = Domingo, 6 = Sábado
+    const isWeekend = (diaSemana === 0 || diaSemana === 6);
+    
+    const nomesDias = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+    
+    return {
+        isWeekend: isWeekend,
+        diaSemana: nomesDias[diaSemana],
+        diaNumero: diaSemana
+    };
 }
 
 // 🔧 LISTA DE FERIADOS E PONTOS FACULTATIVOS PARA 2026
@@ -551,6 +568,13 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // 🔧 VERIFICAR SE É FIM DE SEMANA
+        const weekendInfo = verificarFimDeSemana(dataStr);
+        if (weekendInfo.isWeekend) {
+            alert(`❌ ${weekendInfo.diaSemana} não é dia útil para reservas.\n\nOs finais de semana não estão disponíveis para reservas automáticas.\n\n📞 Entre em contato com os bolsistas do LEP para verificar a disponibilidade em casos especiais.`);
+            return;
+        }
+
         // 🔧 VERIFICAR SE É FERIADO
         const feriadoInfo = verificarFeriadoOuPontoFacultativo(dataStr);
         if (feriadoInfo.isFeriado) {
@@ -636,6 +660,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 div.style.border = '2px solid #004aad';
             }
 
+            // 🔧 VERIFICAR SE É FIM DE SEMANA
+            const weekendInfo = verificarFimDeSemana(dataStr);
+
             // 🔧 VERIFICAR SE É FERIADO OU PONTO FACULTATIVO
             const feriadoInfo = verificarFeriadoOuPontoFacultativo(dataStr);
 
@@ -657,7 +684,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     alert(`❌ ${feriadoInfo.descricao}\n\nNão é possível fazer reservas nesta data.`);
                 };
 
-                // Pular para o próximo dia
+                miniCalendarioGrid.appendChild(div);
+                continue;
+            }
+            
+            // 🔧 VERIFICAR SE É FIM DE SEMANA (SÁBADO OU DOMINGO)
+            else if (weekendInfo.isWeekend) {
+                div.classList.add('fim-de-semana');
+                div.title = `${weekendInfo.diaSemana} - Não é dia útil para reservas. Entre em contato com os bolsistas para casos especiais.`;
+                
+                // Desabilitar clique
+                div.onclick = function () {
+                    alert(`❌ ${weekendInfo.diaSemana} não é dia útil para reservas.\n\nOs finais de semana não estão disponíveis para reservas automáticas.\n\n📞 Entre em contato com os bolsistas do LEP para verificar a disponibilidade em casos especiais.`);
+                };
+                
                 miniCalendarioGrid.appendChild(div);
                 continue;
             }
@@ -862,6 +902,16 @@ document.addEventListener('DOMContentLoaded', function () {
             return { disponivel: false, motivo: 'Data inválida' };
         }
 
+        // 🔧 VERIFICAR SE É FIM DE SEMANA
+        const weekendInfo = verificarFimDeSemana(dataStr);
+        if (weekendInfo.isWeekend) {
+            return { 
+                disponivel: false, 
+                motivo: `${weekendInfo.diaSemana} não é dia útil. Entre em contato com os bolsistas.`,
+                turno: turno
+            };
+        }
+
         const hojeSemHora = getDataLocalSemHora(hoje);
         const dataSemHora = getDataLocalSemHora(dataDia);
 
@@ -963,6 +1013,18 @@ document.addEventListener('DOMContentLoaded', function () {
         const diasIndisponiveis = [];
 
         diasSelecionados.forEach(dataStr => {
+            // 🔧 VERIFICAR SE É FIM DE SEMANA
+            const weekendInfo = verificarFimDeSemana(dataStr);
+            if (weekendInfo.isWeekend) {
+                diasIndisponiveis.push({
+                    data: dataStr,
+                    motivo: `${weekendInfo.diaSemana} não é dia útil`,
+                    turno: 'ambos',
+                    responsavel: 'Sistema'
+                });
+                return;
+            }
+
             // 🔧 VERIFICAR SE É FERIADO
             const feriadoInfo = verificarFeriadoOuPontoFacultativo(dataStr);
             if (feriadoInfo.isFeriado) {
@@ -1002,6 +1064,13 @@ document.addEventListener('DOMContentLoaded', function () {
     function mostrarAlertaDisponibilidade(dataStr) {
         const dataFormatada = formatarDataParaExibicao(new Date(dataStr));
         const turnosSelecionados = obterTurnosSelecionados();
+
+        // 🔧 VERIFICAR SE É FIM DE SEMANA
+        const weekendInfo = verificarFimDeSemana(dataStr);
+        if (weekendInfo.isWeekend) {
+            alert(`❌ ${weekendInfo.diaSemana} não é dia útil para reservas.\n\nOs finais de semana não estão disponíveis para reservas automáticas.\n\n📞 Entre em contato com os bolsistas do LEP para verificar a disponibilidade em casos especiais.`);
+            return;
+        }
 
         // 🔧 VERIFICAR SE É FERIADO
         const feriadoInfo = verificarFeriadoOuPontoFacultativo(dataStr);
@@ -1113,6 +1182,7 @@ document.addEventListener('DOMContentLoaded', function () {
             atualizarCalendario();
         };
     }
+    
     // ALTERNAR VISUALIZAÇÃO
     if (viewButtons.length > 0) {
         viewButtons.forEach(btn => {
@@ -1183,8 +1253,34 @@ document.addEventListener('DOMContentLoaded', function () {
                 div.classList.add('hoje');
             }
 
-            // 🔧 VERIFICAR SE É FERIADO OU PONTO FACULTATIVO
             const dataStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+            
+            // 🔧 VERIFICAR SE É FIM DE SEMANA PRIMEIRO
+            const weekendInfo = verificarFimDeSemana(dataStr);
+            
+            if (weekendInfo.isWeekend) {
+                div.classList.add('fim-de-semana');
+                div.title = `${weekendInfo.diaSemana} - Não é dia útil para reservas. Entre em contato com os bolsistas.`;
+                
+                div.innerHTML = `
+                    <div class="dia-numero">${dia}</div>
+                    <div class="dia-info">
+                        <div class="feriado-info">
+                            <div class="feriado-icon">📅</div>
+                            <div class="feriado-texto">Fim de semana</div>
+                        </div>
+                    </div>
+                `;
+                
+                div.onclick = function () {
+                    alert(`❌ ${weekendInfo.diaSemana} não é dia útil para reservas.\n\nOs finais de semana não estão disponíveis para reservas automáticas.\n\n📞 Entre em contato com os bolsistas do LEP para verificar a disponibilidade em casos especiais.`);
+                };
+                
+                calendarioGrid.appendChild(div);
+                continue;
+            }
+
+            // 🔧 VERIFICAR SE É FERIADO OU PONTO FACULTATIVO
             const feriadoInfo = verificarFeriadoOuPontoFacultativo(dataStr);
 
             if (feriadoInfo.isFeriado) {
@@ -1222,7 +1318,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 continue;
             }
 
-            // Dia normal (não é feriado)
+            // Dia normal (não é feriado e não é fim de semana)
             div.innerHTML = `
                 <div class="dia-numero">${dia}</div>
                 <div class="dia-info">Disponível</div>
@@ -1235,6 +1331,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (!dataObj) {
                     console.error('Data inválida:', dataStr);
+                    return;
+                }
+
+                // 🔧 VERIFICAR SE É FIM DE SEMANA
+                const weekendInfo = verificarFimDeSemana(dataStr);
+                if (weekendInfo.isWeekend) {
+                    alert(`❌ ${weekendInfo.diaSemana} não é dia útil para reservas.\n\nOs finais de semana não estão disponíveis para reservas automáticas.\n\n📞 Entre em contato com os bolsistas do LEP para verificar a disponibilidade em casos especiais.`);
                     return;
                 }
 
@@ -1594,6 +1697,13 @@ document.addEventListener('DOMContentLoaded', function () {
         // Configurar botão para nova reserva
         if (btnNovaReservaMesmaData) {
             btnNovaReservaMesmaData.onclick = function () {
+                // 🔧 VERIFICAR SE É FIM DE SEMANA
+                const weekendInfo = verificarFimDeSemana(dataStr);
+                if (weekendInfo.isWeekend) {
+                    alert(`❌ ${weekendInfo.diaSemana} não é dia útil para reservas.\n\nOs finais de semana não estão disponíveis para reservas automáticas.\n\n📞 Entre em contato com os bolsistas do LEP para verificar a disponibilidade em casos especiais.`);
+                    return;
+                }
+
                 // 🔧 VERIFICAR SE É FERIADO
                 const feriadoInfo = verificarFeriadoOuPontoFacultativo(dataStr);
                 if (feriadoInfo.isFeriado) {
@@ -1720,7 +1830,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             reservasPorDia[dia].manha = reserva;
                         } else if (reserva.turno === 'tarde') {
                             reservasPorDia[dia].tarde = reserva;
-                        } else if (reserva.turno === 'noite') { // 🔧 ADICIONAR TURNO DA NOITE
+                        } else if (reserva.turno === 'noite') {
                             reservasPorDia[dia].noite = reserva;
                         }
                     }
@@ -1734,11 +1844,13 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.calendario-grid .dia:not(.vazio)').forEach(diaDiv => {
             const dia = parseInt(diaDiv.dataset.dia);
 
-            // 🔧 PULAR SE FOR FERIADO
+            // 🔧 PULAR SE FOR FERIADO OU FIM DE SEMANA
             const dataStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
             const feriadoInfo = verificarFeriadoOuPontoFacultativo(dataStr);
-            if (feriadoInfo.isFeriado) {
-                return; // Não marca como ocupado se for feriado
+            const weekendInfo = verificarFimDeSemana(dataStr);
+            
+            if (feriadoInfo.isFeriado || weekendInfo.isWeekend) {
+                return; // Não marca como ocupado se for feriado ou fim de semana
             }
 
             // Remover classes antigas
@@ -1876,6 +1988,26 @@ document.addEventListener('DOMContentLoaded', function () {
         const turnosSelecionados = obterTurnosSelecionados();
         if (turnosSelecionados.length === 0) {
             return { valido: false, erro: 'Selecione pelo menos um turno.' };
+        }
+
+        // 🔧 VERIFICAR SE ALGUM DIA É FIM DE SEMANA
+        const diasWeekend = [];
+        for (const dataStr of diasSelecionados) {
+            const weekendInfo = verificarFimDeSemana(dataStr);
+            if (weekendInfo.isWeekend) {
+                diasWeekend.push({
+                    data: dataStr,
+                    diaSemana: weekendInfo.diaSemana
+                });
+            }
+        }
+        
+        if (diasWeekend.length > 0) {
+            const diasLista = diasWeekend.map(d => `${d.diaSemana} (${formatarDataParaExibicao(parseDataStringLocal(d.data))})`).join('\n');
+            return { 
+                valido: false, 
+                erro: `❌ Não é possível reservar nos seguintes finais de semana:\n\n${diasLista}\n\nOs sábados e domingos não são dias úteis para reservas automáticas.\n\n📞 Entre em contato com os bolsistas do LEP para verificar a disponibilidade em casos especiais.` 
+            };
         }
 
         // 🔧 VALIDAR JUSTIFICATIVA SE TURNO DA NOITE FOR SELECIONADO

@@ -3218,3 +3218,61 @@ footer {
     font-size: 12px;
   }
 }
+
+
+/* Estilos para dias de fim de semana no mini calendário */
+.dia-mini.fim-de-semana {
+    background-color: rgba(158, 158, 158, 0.2) !important;
+    border: 1px dashed #999 !important;
+    color: #999 !important;
+    cursor: not-allowed !important;
+    position: relative;
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.dia-mini.fim-de-semana:hover {
+    background-color: rgba(158, 158, 158, 0.3) !important;
+}
+
+.dia-mini.fim-de-semana::after {
+    content: '✗';
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 8px;
+    font-weight: bold;
+    color: #ff6666;
+    background: white;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+/* Estilo para dias de fim de semana no calendário principal */
+.calendario-grid .dia.fim-de-semana {
+    background-color: rgba(158, 158, 158, 0.1) !important;
+    border: 1px dashed #ccc !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+
+.calendario-grid .dia.fim-de-semana:hover {
+    background-color: rgba(158, 158, 158, 0.2) !important;
+    transform: none;
+}
+
+.calendario-grid .dia.fim-de-semana .dia-info {
+    color: #999;
+    font-style: italic;
+}
+
+/* Indicador de fim de semana no número do dia */
+.calendario-grid .dia.fim-de-semana .dia-numero {
+    color: #999;
+    text-decoration: line-through;
+}
