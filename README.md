@@ -46,22 +46,6 @@ Backend:
 
 ---
 
-# 🚀 Como Executar
-
-## Clone o projeto
-
-```bash id="21ug7n"
-git clone https://github.com/seu-usuario/lep-reservas.git
-cd lep-reservas
-```
-
-## Execute
-
-Abra o arquivo `index.html` no navegador
-ou utilize o **Live Server** no VS Code.
-
----
-
 # 📁 Estrutura
 
 ```text id="q7qj6z"
