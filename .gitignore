@@ -1,0 +1,40 @@
+# Configurações sensíveis
+js/config.js
+js/secrets.js
+config.js
+*.config.js
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Backups
+backup_*.json
+*.backup
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build
+dist/
+build/
+*.min.js
+
+# Node modules (se usar)
+node_modules/

@@ -141,14 +141,13 @@ async function enviarNotificacao(reserva) {
     }
 }
 
-// 🔥 CONFIGURAÇÃO DO FIREBASE
 const firebaseConfig = {
-    apiKey: "AIzaSyBsDDnW7HZaie47AgjMaZ5U1orAiLvOaDM",
-    authDomain: "lep-reservas.firebaseapp.com",
-    projectId: "lep-reservas",
-    storageBucket: "lep-reservas.firebasestorage.app",
-    messagingSenderId: "492338423428",
-    appId: "1:492338423428:web:7f72cdd8bcd4a5146f84d1"
+    apiKey: window.APP_CONFIG.FIREBASE_API_KEY,
+    authDomain: window.APP_CONFIG.FIREBASE_AUTH_DOMAIN,
+    projectId: window.APP_CONFIG.FIREBASE_PROJECT_ID,
+    storageBucket: window.APP_CONFIG.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: window.APP_CONFIG.FIREBASE_MESSAGING_SENDER_ID,
+    appId: window.APP_CONFIG.FIREBASE_APP_ID
 };
 
 // 🔥 INICIALIZAR FIREBASE

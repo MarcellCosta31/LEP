@@ -5,8 +5,8 @@ async function notificarTelegram(reserva) {
   
   // 🔧 SUBSTITUA ESTE CHAT_ID PELO DO SEU GRUPO!
   // Exemplo: "-1001234567890" para grupos
-  const CHAT_ID_DO_GRUPO = "-1003832202230"; // ⬅️ SUBSTITUA PELO ID DO SEU GRUPO
-  const CHAT_ID_PRIVADO = "8040576945"; // Mantém o privado também se quiser
+  const TOKEN = window.APP_CONFIG.TELEGRAM_TOKEN;
+    const CHAT_ID = window.APP_CONFIG.TELEGRAM_CHAT_ID;
   
   console.log('🔔 Iniciando notificação Telegram...');
 
