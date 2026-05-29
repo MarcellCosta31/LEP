@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Fluxograma AS-IS - Agendamento LEP</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .pool {
+        border: 2px solid #333;
+        background: #fff;
+    }
+
+    .lane {
+        display: flex;
+        border-top: 1px solid #333;
+        min-height: 140px;
+    }
+
+    .lane:first-child {
+        border-top: none;
+    }
+
+    .lane-title {
+        width: 180px;
+        background: #e3eaf2;
+        border-right: 1px solid #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .lane-content {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 15px;
+        flex-wrap: wrap;
+    }
+
+    .event {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 2px solid #2c3e50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 12px;
+        background: #ecf0f1;
+    }
+
+    .task {
+        width: 160px;
+        padding: 10px;
+        border: 2px solid #34495e;
+        border-radius: 6px;
+        background: #ffffff;
+        text-align: center;
+        font-size: 13px;
+    }
+
+    .gateway {
+        width: 80px;
+        height: 80px;
+        transform: rotate(45deg);
+        border: 2px solid #8e44ad;
+        background: #f5eef8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .gateway span {
+        transform: rotate(-45deg);
+        font-weight: bold;
+    }
+
+    .note {
+        border-left: 4px solid #e74c3c;
+        background: #fdecea;
+        padding: 10px;
+        font-size: 12px;
+        width: 250px;
+    }
+</style>
+</head>
+<body>
+
+<h1>Fluxograma AS-IS – Agendamento do LEP</h1>
+
+<div class="pool">
+
+    <!-- LANE: USUÁRIO -->
+    <div class="lane">
+        <div class="lane-title">Usuário</div>
+        <div class="lane-content">
+            <div class="event">Início<br>Necessidade<br>de reserva</div>
+            <div class="task">Escolher método de agendamento</div>
+            <div class="gateway"><span>X</span></div>
+            <div class="task">Solicitar reserva verbalmente</div>
+            <div class="task">Enviar e-mail de solicitação</div>
+            <div class="task">Preencher Google Forms</div>
+        </div>
+    </div>
+
+    <!-- LANE: BOLSISTA / RESPONSÁVEL -->
+    <div class="lane">
+        <div class="lane-title">Bolsista /<br>Responsável</div>
+        <div class="lane-content">
+            <div class="task">Receber informação verbal</div>
+            <div class="gateway"><span>X</span></div>
+            <div class="task">Ler e-mail</div>
+            <div class="task">Consultar planilha do Forms</div>
+            <div class="gateway"><span>X</span></div>
+            <div class="task">Confirmar ou negar reserva</div>
+            <div class="event">Fim<br>Reserva<br>confirmada</div>
+        </div>
+    </div>
+
+    <!-- LANE: SISTEMAS EXTERNOS -->
+    <div class="lane">
+        <div class="lane-title">Sistemas<br>Externos</div>
+        <div class="lane-content">
+            <div class="task">Armazenar e-mail</div>
+            <div class="task">Registrar resposta no Google Forms</div>
+            <div class="note">
+                ❗ Não existe verificação automática de conflitos<br>
+                ❗ Não há visualização em tempo real<br>
+                ❗ Dados descentralizados
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
