@@ -1,8 +1,5 @@
 # Configurações sensíveis
-js/config.js
-js/secrets.js
-config.js
-*.config.js
+
 
 # Arquivos de ambiente
 .env
