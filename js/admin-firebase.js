@@ -107,7 +107,8 @@ async function checkIfAdmin(uid) {
             // PARA TESTES: Aceitar qualquer email com 'admin' OU emails específicos
             if (user.email.includes('admin') || 
                 user.email === 'admin@exemplo.com' ||
-                user.email === 'admin@teste.com') {
+                user.email === 'admin@teste.com' ||
+                user.email === 'lep.ufpa@gmail.com') {
                 console.log('⚠️ PERMITINDO ACESSO PARA TESTE');
                 return true;
             }

@@ -1,12 +1,8 @@
 // telegram-notificacao.js - VERSÃO PARA GRUPO
 
 async function notificarTelegram(reserva) {
-  const TOKEN = "8599499895:AAGWYnpH6UFm0m89WblXlQpgOtQZeAAuZwQ";
-  
-  // 🔧 SUBSTITUA ESTE CHAT_ID PELO DO SEU GRUPO!
-  // Exemplo: "-1001234567890" para grupos
   const TOKEN = window.APP_CONFIG.TELEGRAM_TOKEN;
-    const CHAT_ID = window.APP_CONFIG.TELEGRAM_CHAT_ID;
+  const CHAT_ID = window.APP_CONFIG.TELEGRAM_CHAT_ID;
   
   console.log('🔔 Iniciando notificação Telegram...');
 
@@ -71,7 +67,7 @@ async function notificarTelegram(reserva) {
 📋 *Ocupação:* ${ocupacaoFormatada}
 🎯 *Finalidade:* ${finalidadeTruncada}
 
-${reserva.turno === 'noite' ? '⚠️ *ATENÇÃO: Turno da noite - Necessita aprovação*' : '✅ *Reserva aprovada automaticamente*'}
+${reserva.status !== 'aprovado' ? '⚠️ *ATENÇÃO: Reserva pendente - Necessita aprovação*' : '✅ *Reserva aprovada automaticamente*'}
 ${reserva.justificativaNoite ? `📝 *Justificativa:* ${justificativaTruncada}` : ''}
 
 📊 *Status:* ${reserva.status === 'aprovado' ? 'APROVADO ✅' : 'PENDENTE ⏳'}
@@ -82,12 +78,12 @@ ${reserva.justificativaNoite ? `📝 *Justificativa:* ${justificativaTruncada}` 
   try {
     // 🔧 ENVIAR PARA O GRUPO (prioridade)
     const payload = {
-      chat_id: CHAT_ID_DO_GRUPO, // Usando o grupo agora
+      chat_id: CHAT_ID,
       text: mensagem,
       parse_mode: "Markdown"
     };
 
-    console.log(`📤 Enviando para GRUPO (ID: ${CHAT_ID_DO_GRUPO})...`);
+    console.log(`📤 Enviando para GRUPO (ID: ${CHAT_ID})...`);
     
     // TENTATIVA 1: Envio direto para o grupo
     try {
@@ -115,7 +111,7 @@ ${reserva.justificativaNoite ? `📝 *Justificativa:* ${justificativaTruncada}` 
         // Se falhar no grupo, tentar no privado como fallback
         if (result.description && result.description.includes('chat not found')) {
           console.log('🔄 Grupo não encontrado, tentando chat privado...');
-          return await enviarParaChatPrivado(reserva, mensagem, TOKEN, CHAT_ID_PRIVADO);
+          return await enviarParaChatPrivado(reserva, mensagem, TOKEN, CHAT_ID);
         }
       }
     } catch (directError) {
@@ -123,7 +119,7 @@ ${reserva.justificativaNoite ? `📝 *Justificativa:* ${justificativaTruncada}` 
       
       // Fallback para chat privado
       console.log('🔄 Tentando chat privado como fallback...');
-      return await enviarParaChatPrivado(reserva, mensagem, TOKEN, CHAT_ID_PRIVADO);
+      return await enviarParaChatPrivado(reserva, mensagem, TOKEN, CHAT_ID);
     }
 
   } catch (error) {
@@ -132,7 +128,7 @@ ${reserva.justificativaNoite ? `📝 *Justificativa:* ${justificativaTruncada}` 
     // Última tentativa: chat privado
     try {
       console.log('🔄 Última tentativa: chat privado...');
-      return await enviarParaChatPrivado(reserva, mensagem, TOKEN, CHAT_ID_PRIVADO);
+      return await enviarParaChatPrivado(reserva, mensagem, TOKEN, CHAT_ID);
     } catch (finalError) {
       console.error('❌ Todas as tentativas falharam:', finalError);
       return false;

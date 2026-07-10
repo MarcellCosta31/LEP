@@ -407,16 +407,38 @@ document.addEventListener('DOMContentLoaded', function () {
     let diasSelecionados = [];
     let reservasExistentes = [];
 
-    // 🔧 MONITORAR MUDANÇAS NA OCUPAÇÃO PARA MOSTRAR/OCULTAR TURNO DA NOITE
+    // Mapeamento de códigos de acesso para docentes da FEI
+    const professoresFEI = {
+        'AdL#2026!X7': 'Adalberto da Cruz Lima',
+        'DhS@2026!K4': 'Diego Hidelbrando Santos',
+        'EcA#2026!M8': 'Elaine Cristina de Souza Angelim',
+        'EaC@2026!R5': 'Eliomar Azevedo do Carmo',
+        'EsC#2026!P9': 'Ednelson da Silva Costa',
+        'EbS@2026!T6': 'Eduardo Braga Costa Santos',
+        'LhG#2026!V3': 'Lauro Henrique Guerreiro',
+        'HmS@2026!Q8': 'Hallan Max Silva Souza',
+        'HdL#2026!N5': 'Harlenn dos Santos Lopes',
+        'CgM@2026!W7': 'Camilo Andrés Guerrero Martin',
+        'LsR#2026!F4': 'Lino Alberto Soares Rodrigues',
+        'PrM@2026!Y9': 'Paulo Roberto Ribeiro Marques',
+        'EvH#2026!J6': 'Edielson da Silva Vilhena'
+    };
+
+    // 🔧 MONITORAR MUDANÇAS NA OCUPAÇÃO PARA MOSTRAR/OCULTAR TURNO DA NOITE E CAMPO DE CÓDIGO
     document.getElementById('ocupacao').addEventListener('change', function () {
         const ocupacao = this.value;
         const noiteContainer = document.getElementById('noiteContainer');
         const justificativaContainer = document.getElementById('justificativaNoiteContainer');
         const mensagemAnalise = document.getElementById('mensagemAnaliseNoite');
+        const codigoContainer = document.getElementById('codigoDocenteContainer');
+        const codigoInput = document.getElementById('codigoDocente');
+        const mensagemCodigo = document.getElementById('mensagemCodigoDocente');
 
         if (ocupacao === 'docente_fei') {
             // Mostrar turno da noite para docentes da FEI
             noiteContainer.style.display = 'flex';
+            // Mostrar campo de código de acesso
+            codigoContainer.style.display = 'block';
         } else {
             // Ocultar turno da noite e campos relacionados
             noiteContainer.style.display = 'none';
@@ -431,6 +453,40 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Limpar justificativa
             document.getElementById('justificativaNoite').value = '';
+
+            // Ocultar e limpar campo de código de acesso
+            codigoContainer.style.display = 'none';
+            codigoInput.value = '';
+            codigoInput.type = 'password';
+            mensagemCodigo.textContent = '';
+            mensagemCodigo.style.color = '#666';
+        }
+    });
+
+    // 🔧 VALIDAR CÓDIGO DE ACESSO DOCENTE FEI EM TEMPO REAL
+    document.getElementById('codigoDocente').addEventListener('input', function () {
+        const codigo = this.value;
+        const mensagemCodigo = document.getElementById('mensagemCodigoDocente');
+        const responsavelInput = document.getElementById('responsavel');
+
+        if (codigo === '') {
+            mensagemCodigo.textContent = '';
+            mensagemCodigo.style.color = '#666';
+            return;
+        }
+
+        if (professoresFEI[codigo]) {
+            const nomeProfessor = professoresFEI[codigo];
+            mensagemCodigo.textContent = `✅ Código válido! Bem-vindo(a), ${nomeProfessor}.`;
+            mensagemCodigo.style.color = 'green';
+            responsavelInput.value = nomeProfessor;
+            responsavelInput.disabled = true;
+        } else {
+            mensagemCodigo.textContent = '❌ Código inválido. Verifique e tente novamente.';
+            mensagemCodigo.style.color = 'red';
+            if (!responsavelInput.disabled) {
+                responsavelInput.disabled = false;
+            }
         }
     });
 
@@ -505,6 +561,16 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('justificativaNoiteContainer').style.display = 'none';
         document.getElementById('mensagemAnaliseNoite').style.display = 'none';
         document.getElementById('noiteContainer').style.display = 'none';
+
+        // 🔧 RESETAR CAMPOS DE CÓDIGO DOCENTE FEI
+        const codDocContainer = document.getElementById('codigoDocenteContainer');
+        if (codDocContainer) codDocContainer.style.display = 'none';
+        const codDocInput = document.getElementById('codigoDocente');
+        if (codDocInput) { codDocInput.value = ''; codDocInput.type = 'password'; }
+        const msgCodDoc = document.getElementById('mensagemCodigoDocente');
+        if (msgCodDoc) { msgCodDoc.textContent = ''; msgCodDoc.style.color = '#666'; }
+        const respInput = document.getElementById('responsavel');
+        if (respInput) respInput.disabled = false;
     };
 
     window.onclick = function (event) {
@@ -519,6 +585,16 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('justificativaNoiteContainer').style.display = 'none';
             document.getElementById('mensagemAnaliseNoite').style.display = 'none';
             document.getElementById('noiteContainer').style.display = 'none';
+
+            // 🔧 RESETAR CAMPOS DE CÓDIGO DOCENTE FEI
+            const codDocContainer = document.getElementById('codigoDocenteContainer');
+            if (codDocContainer) codDocContainer.style.display = 'none';
+            const codDocInput = document.getElementById('codigoDocente');
+            if (codDocInput) { codDocInput.value = ''; codDocInput.type = 'password'; }
+            const msgCodDoc = document.getElementById('mensagemCodigoDocente');
+            if (msgCodDoc) { msgCodDoc.textContent = ''; msgCodDoc.style.color = '#666'; }
+            const respInput = document.getElementById('responsavel');
+            if (respInput) respInput.disabled = false;
         }
 
         if (event.target === modalVisualizacao) {
@@ -540,6 +616,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('justificativaNoiteContainer').style.display = 'none';
                 document.getElementById('mensagemAnaliseNoite').style.display = 'none';
                 document.getElementById('noiteContainer').style.display = 'none';
+
+                // 🔧 RESETAR CAMPOS DE CÓDIGO DOCENTE FEI
+                const codDocContainer = document.getElementById('codigoDocenteContainer');
+                if (codDocContainer) codDocContainer.style.display = 'none';
+                const codDocInput = document.getElementById('codigoDocente');
+                if (codDocInput) { codDocInput.value = ''; codDocInput.type = 'password'; }
+                const msgCodDoc = document.getElementById('mensagemCodigoDocente');
+                if (msgCodDoc) { msgCodDoc.textContent = ''; msgCodDoc.style.color = '#666'; }
+                const respInput = document.getElementById('responsavel');
+                if (respInput) respInput.disabled = false;
             }
 
             if (modalVisualizacao && modalVisualizacao.style.display === 'flex') {
@@ -1989,6 +2075,18 @@ document.addEventListener('DOMContentLoaded', function () {
             return { valido: false, erro: 'Selecione pelo menos um turno.' };
         }
 
+        // 🔧 VALIDAR CÓDIGO DE ACESSO PARA DOCENTE DA FEI
+        const ocupacao = document.getElementById('ocupacao').value;
+        if (ocupacao === 'docente_fei') {
+            const codigo = document.getElementById('codigoDocente').value;
+            if (!codigo) {
+                return { valido: false, erro: 'Informe o código de acesso para Docente da FEI.' };
+            }
+            if (!professoresFEI[codigo]) {
+                return { valido: false, erro: 'Código de acesso inválido. Verifique e tente novamente.' };
+            }
+        }
+
         // 🔧 VERIFICAR SE ALGUM DIA É FIM DE SEMANA
         const diasWeekend = [];
         for (const dataStr of diasSelecionados) {
@@ -2139,23 +2237,26 @@ document.addEventListener('DOMContentLoaded', function () {
             return formatarDataParaStringUTC(dataLocal);
         });
 
+        // 🔧 DETERMINAR STATUS BASEADO NA OCUPAÇÃO
+        const ocupacao = document.getElementById('ocupacao').value;
+        const precisaAnalise = ocupacao !== 'docente_fei';
+        const temTurnoNoite = turnosSelecionados.includes('noite');
+
         console.log('Dias selecionados (local):', diasSelecionados);
         console.log('Dias para salvar (UTC):', diasUTC);
         console.log('Turnos selecionados:', turnosSelecionados);
+        console.log('Precisa análise:', precisaAnalise);
 
         // Botão de envio
         const submitBtn = formReserva.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
-        submitBtn.textContent = turnosSelecionados.includes('noite') ? 'Enviando para análise...' : 'Criando reserva(s)...';
+        submitBtn.textContent = (precisaAnalise || temTurnoNoite) ? 'Enviando para análise...' : 'Criando reserva(s)...';
         submitBtn.disabled = true;
 
         try {
             if (!db) {
                 throw new Error('Banco de dados não disponível');
             }
-
-            // 🔧 DETERMINAR STATUS BASEADO NOS TURNOS
-            const temTurnoNoite = turnosSelecionados.includes('noite');
 
             // Criar uma reserva para CADA TURNO selecionado
             const promises = turnosSelecionados.map(async (turno) => {
@@ -2168,13 +2269,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     ocupacao: document.getElementById('ocupacao').value,
                     dias: diasUTC, // 🔧 Usar formato UTC
                     turno: turno,
-                    // 🔧 STATUS DIFERENCIADO: pendente para noite, aprovado para outros
-                    status: turno === 'noite' ? 'pendente' : 'aprovado',
+                    // 🔧 STATUS: pendente para não-docentes ou turno noite, aprovado só docente_fei turno normal
+                    status: (precisaAnalise || turno === 'noite') ? 'pendente' : 'aprovado',
                     criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
                     visualizado: false,
                     // 🔧 APROVAÇÃO DIFERENCIADA
-                    aprovadoEm: turno === 'noite' ? null : firebase.firestore.FieldValue.serverTimestamp(),
-                    aprovadoPor: turno === 'noite' ? null : 'sistema',
+                    aprovadoEm: (precisaAnalise || turno === 'noite') ? null : firebase.firestore.FieldValue.serverTimestamp(),
+                    aprovadoPor: (precisaAnalise || turno === 'noite') ? null : 'sistema',
                     // 🔧 ADICIONAR JUSTIFICATIVA SE FOR TURNO DA NOITE
                     justificativaNoite: turno === 'noite' ? obterJustificativaNoite() : null,
                     // 🔧 ADICIONAR FLAG DE TURNO ESPECIAL
@@ -2207,9 +2308,14 @@ document.addEventListener('DOMContentLoaded', function () {
             // Aguardar todas as reservas serem salvas
             const resultados = await Promise.all(promises);
 
-            // 🔧 MENSAGEM DIFERENCIADA BASEADA NOS TURNOS
-            if (temTurnoNoite) {
-                // Separar turnos diurnos e noturnos
+            // 🔧 MENSAGEM DIFERENCIADA BASEADA NA OCUPAÇÃO
+            if (precisaAnalise) {
+                const turnosTexto = turnosSelecionados.map(t =>
+                    t === 'manha' ? 'Manhã' : t === 'tarde' ? 'Tarde' : 'Noite'
+                ).join(', ');
+                const quantos = turnosSelecionados.length;
+                alert(`📋 ${quantos} reserva(s) criada(s) com sucesso!\n\nTurno(s): ${turnosTexto}\nStatus: Pendente\n\n⏳ Aguardando aprovação da equipe do LEP.\nO prazo de análise é de até 5 dias úteis.`);
+            } else if (temTurnoNoite) {
                 const turnosDiurnos = turnosSelecionados.filter(t => t !== 'noite');
                 const temTurnosDiurnos = turnosDiurnos.length > 0;
 
@@ -2227,7 +2333,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 alert(mensagem);
             } else {
-                // Mensagem original para apenas turnos diurnos
                 if (turnosSelecionados.length === 1) {
                     alert(`✅ Reserva criada e APROVADA automaticamente!\n\nID: ${resultados[0].id}\nStatus: Aprovado\nTurno: ${turnosSelecionados[0] === 'manha' ? 'Manhã' : 'Tarde'}\n\nA reserva já está ativa no sistema.`);
                 } else {
@@ -2249,13 +2354,35 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('mensagemAnaliseNoite').style.display = 'none';
             document.getElementById('noiteContainer').style.display = 'none';
 
+            // 🔧 RESETAR CAMPOS DE CÓDIGO DOCENTE FEI
+            const codDocContainer = document.getElementById('codigoDocenteContainer');
+            if (codDocContainer) codDocContainer.style.display = 'none';
+            const codDocInput = document.getElementById('codigoDocente');
+            if (codDocInput) { codDocInput.value = ''; codDocInput.type = 'password'; }
+            const msgCodDoc = document.getElementById('mensagemCodigoDocente');
+            if (msgCodDoc) { msgCodDoc.textContent = ''; msgCodDoc.style.color = '#666'; }
+            const respInput = document.getElementById('responsavel');
+            if (respInput) respInput.disabled = false;
+
             // Atualizar lista de reservas IMEDIATAMENTE
             if (viewAtual === 'monthly') {
                 setTimeout(carregarReservas, 500);
             }
 
-            mostrarFeedback(temTurnoNoite ? 'Reserva(s) enviada(s) para análise!' : 'Reserva(s) aprovada(s) com sucesso!',
-                temTurnoNoite ? 'aviso' : 'sucesso');
+            let mensagemFeedback;
+            let tipoFeedback;
+            if (precisaAnalise) {
+                mensagemFeedback = 'Reserva(s) enviada(s) para análise!';
+                tipoFeedback = 'aviso';
+                abrirModalAvisoAnalise();
+            } else if (temTurnoNoite) {
+                mensagemFeedback = 'Reserva(s) enviada(s) para análise!';
+                tipoFeedback = 'aviso';
+            } else {
+                mensagemFeedback = 'Reserva(s) aprovada(s) com sucesso!';
+                tipoFeedback = 'sucesso';
+            }
+            mostrarFeedback(mensagemFeedback, tipoFeedback);
 
         } catch (error) {
             console.error('Erro ao salvar:', error);
@@ -2318,6 +2445,50 @@ document.addEventListener('DOMContentLoaded', function () {
                 }, 300);
             }
         }, 5000);
+    }
+
+    // 🔧 FUNÇÃO PARA ABRIR MODAL DE AVISO DE ANÁLISE
+    function abrirModalAvisoAnalise() {
+        const modalAviso = document.getElementById('modalAvisoAnalise');
+        const btnFechar = document.getElementById('btnFecharAvisoAnalise');
+        const contador = document.getElementById('contadorAviso');
+
+        if (!modalAviso || !btnFechar || !contador) return;
+
+        modalAviso.style.display = 'flex';
+        btnFechar.disabled = true;
+        btnFechar.style.opacity = '0.6';
+        let segundos = 5;
+        contador.textContent = segundos;
+
+        const timer = setInterval(() => {
+            segundos--;
+            contador.textContent = segundos;
+            if (segundos <= 0) {
+                clearInterval(timer);
+                btnFechar.disabled = false;
+                btnFechar.style.opacity = '1';
+                contador.textContent = '0';
+            }
+        }, 1000);
+
+        btnFechar.onclick = function () {
+            modalAviso.style.display = 'none';
+            btnFechar.disabled = true;
+            btnFechar.style.opacity = '0.6';
+            contador.textContent = '5';
+            clearInterval(timer);
+        };
+
+        modalAviso.addEventListener('click', function (e) {
+            if (e.target === modalAviso && !btnFechar.disabled) {
+                modalAviso.style.display = 'none';
+                btnFechar.disabled = true;
+                btnFechar.style.opacity = '0.6';
+                contador.textContent = '5';
+                clearInterval(timer);
+            }
+        });
     }
 
     // Adicionar animações CSS dinamicamente

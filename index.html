@@ -249,6 +249,12 @@
                     <option value="usuario_externo">Usuário Externo</option>
                 </select>
 
+                <div id="codigoDocenteContainer" style="display: none;">
+                    <label for="codigoDocente">Código de Acesso - Docente FEI</label>
+                    <input type="password" id="codigoDocente" name="codigoDocente" placeholder="Digite seu código de acesso">
+                    <p id="mensagemCodigoDocente" style="font-size: 0.85rem; margin-top: 5px; color: #666;"></p>
+                </div>
+
                 <label>Dias de uso da reserva:</label>
                 <div class="dias-selecao">
                     <div class="calendario-mini">
@@ -385,6 +391,27 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL DE AVISO DE ANÁLISE -->
+    <div class="modal" id="modalAvisoAnalise">
+        <div class="modal-content" style="max-width: 480px; text-align: center;">
+            <div class="modal-header" style="border-bottom: none;">
+                <h2 style="color: #cc0000;">Atenção!</h2>
+            </div>
+            <div style="padding: 20px 10px;">
+                <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 20px;">
+                    Para a aprovação da reserva é necessário enviar um ofício para o e-mail abaixo, a aprovação da reserva leva até 5 dias de análise.
+                </p>
+                <p style="font-size: 1rem; font-weight: bold; color: #004aad; margin-bottom: 25px;">
+                    lep.ufpa@gmail.com
+                </p>
+                <button type="button" id="btnFecharAvisoAnalise" class="btn-primary" disabled style="padding: 12px 40px; font-size: 1rem; opacity: 0.6;">
+                    Fechar (<span id="contadorAviso">5</span>s)
+                </button>
+            </div>
+        </div>
+    </div>
+
     <footer>
         © 2026 - Laboratório de Engenharia de Produção
     </footer>
