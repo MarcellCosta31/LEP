@@ -1,50 +1,101 @@
+:root {
+    --primary: #004aad;
+    --primary-dark: #003a8c;
+    --primary-light: #eef4ff;
+    --primary-hover: #0056cc;
+    --text: #003366;
+    --text-secondary: #555;
+    --text-muted: #777;
+    --bg: #eef4ff;
+    --bg-card: #ffffff;
+    --bg-day: #f4f7ff;
+    --border: #ccc;
+    --border-light: #e0e0e0;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
+    --shadow-xl: 0 20px 50px rgba(0,0,0,0.15);
+    --radius-sm: 6px;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --font: 'Inter', 'Segoe UI', Arial, sans-serif;
+    --gradient-header: linear-gradient(135deg, #004aad 0%, #002d6e 100%);
+    --gradient-body: linear-gradient(180deg, #eef4ff 0%, #e0e9f9 100%);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: var(--font);
+}
+
+::selection {
+    background-color: var(--primary);
+    color: white;
 }
 
 body {
-    background-color: #eef4ff;
-    color: #003366;
+    background: var(--gradient-body);
+    color: var(--text);
     line-height: 1.6;
+    min-height: 100vh;
 }
 
 /* HEADER */
 .header {
-    background-color: #004aad;
+    background: var(--gradient-header);
     color: white;
     padding: 20px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
 }
 
 .header-left h1 {
     font-size: 2rem;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
 
 .header-left span {
     font-size: 0.9rem;
-    opacity: 0.9;
+    opacity: 0.85;
+    font-weight: 400;
 }
 
 .header button {
     background-color: white;
-    color: #004aad;
+    color: var(--primary);
     border: none;
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all var(--transition);
+    box-shadow: var(--shadow-sm);
 }
 
 .header button:hover {
-    background-color: #f0f0f0;
+    background-color: #f5f7fa;
     transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.header button:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
 }
 
 /* HEADER - ORGANIZAÇÃO DOS BOTÕES */
@@ -55,20 +106,23 @@ body {
 }
 
 .admin-link {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.15);
     color: white;
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    font-weight: 600;
     text-decoration: none;
-    transition: all 0.3s;
+    transition: all var(--transition);
     white-space: nowrap;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
 }
 
 .admin-link:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.25);
     transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 /* CONTAINER */
@@ -83,9 +137,15 @@ body {
 /* CARDS */
 .card {
     background-color: white;
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255,255,255,0.6);
+    transition: all var(--transition);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-lg);
 }
 
 /* CALENDÁRIO */
@@ -105,7 +165,7 @@ body {
 }
 
 .nav-mes button {
-    background-color: #004aad;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
     border: none;
     width: 40px;
@@ -113,11 +173,20 @@ body {
     border-radius: 50%;
     cursor: pointer;
     font-size: 1.2rem;
-    transition: background-color 0.3s;
+    transition: all var(--transition);
+    box-shadow: 0 4px 10px rgba(0,74,173,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .nav-mes button:hover {
-    background-color: #003a8c;
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0,74,173,0.35);
+}
+
+.nav-mes button:active {
+    transform: scale(0.95);
 }
 
 #tituloCalendario {
@@ -134,17 +203,24 @@ body {
 
 .view-btn {
     background-color: #e1ebff;
-    color: #004aad;
+    color: var(--primary);
     border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 10px 20px;
+    border-radius: var(--radius);
     cursor: pointer;
-    transition: all 0.3s;
+    font-weight: 500;
+    transition: all var(--transition);
+}
+
+.view-btn:hover {
+    background-color: #c5d6f5;
+    transform: translateY(-1px);
 }
 
 .view-btn.active {
-    background-color: #004aad;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
+    box-shadow: 0 4px 12px rgba(0,74,173,0.3);
 }
 
 /* CONTAINERS DE VISUALIZAÇÃO */
@@ -210,25 +286,35 @@ body {
 }
 
 .calendario-grid .dia {
-    background-color: #f4f7ff;
+    background-color: var(--bg-day);
     padding: 15px 10px;
-    border-radius: 8px;
+    border-radius: var(--radius);
     text-align: center;
     min-height: 80px;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all var(--transition);
     position: relative;
+    border: 1px solid transparent;
 }
 
 .calendario-grid .dia:hover {
     background-color: #dce8ff;
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,74,173,0.15);
+    border-color: rgba(0,74,173,0.1);
+}
+
+.calendario-grid .dia:active {
+    transform: translateY(-1px);
 }
 
 .calendario-grid .dia-header {
-    font-weight: bold;
+    font-weight: 700;
     margin-bottom: 5px;
-    color: #004aad;
+    color: var(--primary);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .calendario-grid .dia-numero {
@@ -238,8 +324,9 @@ body {
 }
 
 .calendario-grid .hoje {
-    background-color: #004aad;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
+    box-shadow: 0 4px 12px rgba(0,74,173,0.3);
 }
 
 /* ESTILOS PARA AS REGRAS */
@@ -247,19 +334,20 @@ body {
     text-align: center;
     margin-bottom: 30px;
     padding-bottom: 20px;
-    border-bottom: 3px solid #004aad;
+    border-bottom: 3px solid var(--primary);
 }
 
 .regras-header h2 {
-    color: #004aad;
+    color: var(--primary);
     font-size: 2rem;
     margin-bottom: 10px;
     text-transform: uppercase;
     letter-spacing: 1px;
+    font-weight: 700;
 }
 
 .regras-header .subheader {
-    color: #666;
+    color: var(--text-secondary);
     font-size: 1rem;
     margin: 5px 0;
     font-weight: 500;
@@ -279,22 +367,22 @@ body {
     gap: 20px;
     padding: 20px;
     background-color: #f8faff;
-    border-radius: 10px;
-    border-left: 4px solid #004aad;
-    transition: all 0.3s ease;
+    border-radius: var(--radius-lg);
+    border-left: 4px solid var(--primary);
+    transition: all var(--transition);
 }
 
 .regra-item:hover {
-    background-color: #eef4ff;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 74, 173, 0.1);
+    background-color: white;
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
 }
 
 .regra-numero {
     flex-shrink: 0;
     width: 40px;
     height: 40px;
-    background-color: #004aad;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
     border-radius: 50%;
     display: flex;
@@ -349,17 +437,26 @@ body {
     z-index: 1000;
     padding: 20px;
     overflow-y: auto;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    animation: fadeIn 0.25s ease-out;
+}
+
+.modal.show {
+    display: flex;
 }
 
 .modal-content {
     background-color: white;
     padding: 30px;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     width: 100%;
     max-width: 500px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    box-shadow: var(--shadow-xl);
     max-height: 85vh;
     overflow-y: auto;
+    animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .modal-content::-webkit-scrollbar {
@@ -394,27 +491,35 @@ body {
 
 .modal-content label {
     margin-bottom: 0;
-    font-weight: bold;
-    color: #003366;
+    font-weight: 600;
+    color: var(--text);
     font-size: 0.95rem;
 }
 
 .modal-content input,
 .modal-content select,
 .modal-content textarea {
-    padding: 10px 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    padding: 12px 14px;
+    border: 1.5px solid #d1d9e6;
+    border-radius: var(--radius);
     font-size: 1rem;
-    background-color: white;
+    background-color: #fcfdff;
+    transition: all var(--transition);
 }
 
 .modal-content input:focus,
 .modal-content select:focus,
 .modal-content textarea:focus {
     outline: none;
-    border-color: #004aad;
-    box-shadow: 0 0 0 2px rgba(0, 74, 173, 0.2);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 74, 173, 0.15);
+    background-color: white;
+}
+
+.modal-content input:hover,
+.modal-content select:hover,
+.modal-content textarea:hover {
+    border-color: #a0b4d0;
 }
 
 .modal-content textarea {
@@ -433,22 +538,29 @@ body {
 .radio-option {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 6px;
-    transition: background-color 0.3s;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    transition: all var(--transition);
+    border: 1.5px solid transparent;
 }
 
 .radio-option:hover {
     background-color: #f0f4ff;
+    border-color: #d1d9e6;
 }
 
 .radio-option input[type="radio"] {
     margin: 0;
-    width: 18px;
-    height: 18px;
-    accent-color: #004aad;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary);
+}
+
+.radio-option:has(input:checked) {
+    background-color: #eef4ff;
+    border-color: var(--primary);
 }
 
 /* SELEÇÃO DE DIAS */
@@ -498,27 +610,32 @@ body {
 }
 
 .dia-mini {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 0.8rem;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     background-color: white;
-    border: 1px solid #e0e0e0;
-    transition: all 0.2s;
+    border: 1.5px solid #d1d9e6;
+    transition: all var(--transition);
+    font-weight: 500;
 }
 
 .dia-mini:hover {
     background-color: #e8efff;
+    border-color: var(--primary);
+    transform: scale(1.1);
+    z-index: 1;
 }
 
 .dia-mini.selecionado {
-    background-color: #004aad;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
-    border-color: #004aad;
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(0,74,173,0.3);
 }
 
 .dia-mini.inativo {
@@ -567,43 +684,56 @@ body {
 .modal-buttons {
     display: flex;
     justify-content: space-between;
+    gap: 12px;
     margin-top: 20px;
 }
 
 .modal-buttons button {
-    padding: 10px 20px;
+    padding: 12px 24px;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius);
     cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all var(--transition);
+    flex: 1;
 }
 
 .modal-buttons button[type="submit"] {
-    background-color: #004aad;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
+    box-shadow: 0 4px 12px rgba(0,74,173,0.3);
 }
 
 .modal-buttons button[type="submit"]:hover {
-    background-color: #003a8c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,74,173,0.4);
+}
+
+.modal-buttons button[type="submit"]:active {
+    transform: translateY(0);
 }
 
 .modal-buttons button[type="button"] {
-    background-color: #e0e0e0;
+    background-color: #f0f2f5;
     color: #333;
+    border: 1px solid #e0e0e0;
 }
 
 .modal-buttons button[type="button"]:hover {
-    background-color: #d0d0d0;
+    background-color: #e4e7ec;
+    transform: translateY(-2px);
 }
 
 /* FOOTER */
 footer {
     text-align: center;
-    padding: 15px;
-    background-color: #004aad;
+    padding: 20px;
+    background: var(--gradient-header);
     color: white;
-    margin-top: 30px;
+    margin-top: 40px;
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
 }
 
 /* ESTILOS PARA DIAS OCUPADOS NO CALENDÁRIO */
@@ -811,8 +941,8 @@ footer {
 /* Indicador de disponibilidade no modal */
 .disponibilidade-status {
     margin: 10px 0;
-    padding: 10px;
-    border-radius: 5px;
+    padding: 12px 16px;
+    border-radius: var(--radius);
     font-size: 0.9rem;
     display: none;
 }
@@ -2127,28 +2257,37 @@ footer {
 .checkbox-option {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    transition: all 0.3s;
+    padding: 12px 16px;
+    border: 1.5px solid #d1d9e6;
+    border-radius: var(--radius);
+    transition: all var(--transition);
+    background-color: #fcfdff;
 }
 
 .checkbox-option:hover {
-    background-color: #f9f9f9;
-    border-color: #004aad;
+    border-color: var(--primary);
+    background-color: #f5f8ff;
+    transform: translateX(4px);
 }
 
 .checkbox-option input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     cursor: pointer;
+    accent-color: var(--primary);
 }
 
 .checkbox-option span {
-    font-size: 14px;
-    color: #333;
+    font-size: 0.95rem;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.checkbox-option:has(input:checked) {
+    border-color: var(--primary);
+    background-color: #eef4ff;
 }
 
 /* Quando checkbox está marcado */
@@ -2262,33 +2401,46 @@ footer {
 }
 
 .btn-primary {
-    background-color: #004aad;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
+    padding: 12px 24px;
+    border-radius: var(--radius);
     cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s;
+    font-weight: 600;
+    transition: all var(--transition);
+    box-shadow: 0 4px 12px rgba(0,74,173,0.3);
 }
 
 .btn-primary:hover {
-    background-color: #003a8c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,74,173,0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .btn-secondary {
     background-color: #f8f9fa;
-    color: #004aad;
-    border: 2px solid #004aad;
+    color: var(--primary);
+    border: 2px solid var(--primary);
     padding: 10px 20px;
-    border-radius: 6px;
+    border-radius: var(--radius);
     cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s;
+    font-weight: 600;
+    transition: all var(--transition);
 }
 
 .btn-secondary:hover {
     background-color: #eef4ff;
+    transform: translateY(-2px);
 }
 
 /* Container de reservas */
@@ -2580,18 +2732,18 @@ footer {
 
 .contato-card {
     background: white;
-    border-radius: 10px;
-    padding: 20px;
+    border-radius: var(--radius-lg);
+    padding: 24px;
     width: 280px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s, box-shadow 0.3s;
-    border-top: 4px solid #004aad;
+    box-shadow: var(--shadow);
+    transition: all var(--transition);
+    border-top: 4px solid var(--primary);
     text-align: center;
 }
 
 .contato-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 74, 173, 0.15);
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-xl);
 }
 
 .nome-responsavel {
@@ -2621,20 +2773,25 @@ footer {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background-color: #25D366;
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
     color: white;
     text-decoration: none;
-    padding: 10px 20px;
+    padding: 12px 24px;
     border-radius: 50px;
-    font-weight: bold;
-    transition: all 0.3s;
+    font-weight: 600;
+    transition: all var(--transition);
     width: 100%;
     box-sizing: border-box;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
 }
 
 .link-whatsapp:hover {
-    background-color: #128C7E;
-    transform: scale(1.05);
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+}
+
+.link-whatsapp:active {
+    transform: scale(1);
 }
 
 .link-whatsapp::before {
@@ -2777,8 +2934,10 @@ footer {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 3px;
+    padding: 4px;
     margin-top: 2px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
 }
 
 .feriado-icon {
@@ -2807,9 +2966,10 @@ footer {
 /* Modal de visualização - informações de feriado */
 .aviso-feriado {
     margin-bottom: 20px;
-    padding: 15px;
-    border-radius: 8px;
+    padding: 16px 20px;
+    border-radius: var(--radius);
     animation: fadeIn 0.5s ease-in;
+    box-shadow: var(--shadow-sm);
 }
 
 .aviso-feriado.feriado,
@@ -2937,6 +3097,17 @@ footer {
 }
 
 /* Animações */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -2946,6 +3117,22 @@ footer {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
 }
 
 /* Responsividade para informações de feriado */
