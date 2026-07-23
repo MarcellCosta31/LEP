@@ -777,6 +777,231 @@ main {
   }
 }
 
+/* Tooltip dos assentos */
+.seat-tooltip {
+  position: fixed;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  pointer-events: none;
+  z-index: 10000;
+  border: 1px solid #334155;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  opacity: 0;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.seat-tooltip.visible {
+  opacity: 1;
+}
+.seat-tooltip strong {
+  color: #fff;
+}
+.seat-tooltip .status-disponivel { color: #22c55e; }
+.seat-tooltip .status-ocupado { color: #ef4444; }
+.seat-tooltip .status-reservado { color: #f59e0b; }
+.seat-tooltip small {
+  opacity: 0.7;
+  font-size: 11px;
+}
+
+/* Modal dos assentos */
+.seat-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.seat-modal {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border: 1px solid #334155;
+  border-radius: 24px;
+  padding: 0;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+  position: relative;
+  animation: modalIn 0.25s ease-out;
+}
+@keyframes modalIn {
+  from { transform: scale(0.9) translateY(20px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+.seat-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #94a3b8;
+  font-size: 24px;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 10;
+  line-height: 1;
+}
+.seat-modal-close:hover {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+}
+.seat-modal-body {
+  padding: 30px 28px;
+  text-align: center;
+  color: #e2e8f0;
+}
+.modal-seat-icon {
+  font-size: 48px;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 16px;
+  background: rgba(34,197,94,0.15);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(34,197,94,0.3);
+}
+.modal-seat-icon.ocupado {
+  background: rgba(239,68,68,0.15);
+  border-color: rgba(239,68,68,0.3);
+}
+.modal-seat-icon.reservado {
+  background: rgba(245,158,11,0.15);
+  border-color: rgba(245,158,11,0.3);
+}
+.seat-modal-body h2 {
+  font-size: 24px;
+  color: #fff;
+  margin-bottom: 20px;
+}
+.modal-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+.modal-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.modal-info-label {
+  font-size: 13px;
+  color: #94a3b8;
+}
+.modal-info-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+.modal-info-value.status-disponivel { color: #22c55e; }
+.modal-info-value.status-ocupado { color: #ef4444; }
+.modal-info-value.status-reservado { color: #f59e0b; }
+.modal-btn-reservar, .modal-btn-liberar {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.modal-btn-reservar {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  box-shadow: 0 8px 20px rgba(34,197,94,0.3);
+}
+.modal-btn-reservar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(34,197,94,0.4);
+}
+.modal-btn-liberar {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 8px 20px rgba(239,68,68,0.3);
+}
+.modal-btn-liberar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(239,68,68,0.4);
+}
+
+/* Legenda do mapa */
+.mapa-legend {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(15,23,42,0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  padding: 10px 14px;
+  z-index: 20;
+  display: flex;
+  gap: 14px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #cbd5e1;
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.legend-item.disponivel .legend-dot { background: #22c55e; }
+.legend-item.ocupado .legend-dot { background: #ef4444; }
+.legend-item.sem-pc .legend-dot { background: #64748b; }
+.legend-count {
+  font-weight: 700;
+  color: #fff;
+  font-size: 12px;
+  min-width: 16px;
+  text-align: center;
+}
+
+/* Estados extras dos assentos */
+.assento.reservado {
+  background: rgba(245,158,11,0.9);
+  border-color: #f59e0b;
+}
+.assento.sem-pc {
+  background: rgba(100,116,139,0.7);
+  border-color: #64748b;
+  border-style: dashed;
+  cursor: default;
+  opacity: 0.8;
+}
+.assento.sem-pc:hover {
+  transform: none;
+  z-index: auto;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  border-color: #64748b;
+}
+
 /* Touch devices - melhorar área de clique */
 @media (hover: none) and (pointer: coarse) {
   .assento {

@@ -142,6 +142,9 @@ async function loadDashboardData() {
         
         console.log(`Estatísticas: Total=${totalReservas}, Aprovadas=${aprovadas}, EstaSemana=${reservasEstaSemana.length}`);
         
+        // Carregar contagem de visitas
+        carregarVisitas();
+        
         // Atualizar interface - TOTAL DE RESERVAS
         const totalElement = document.getElementById('totalReservas');
         if (totalElement) {
@@ -237,6 +240,19 @@ function updateStatElement(elementId, value) {
         } else {
             element.textContent = value;
         }
+    }
+}
+
+async function carregarVisitas() {
+    try {
+        if (!adminFirebase || !adminFirebase.db) return;
+        var doc = await adminFirebase.db.collection('stats').doc('visits').get();
+        var visitsEl = document.getElementById('totalVisitas');
+        if (visitsEl && doc.exists) {
+            animateCounter(visitsEl, doc.data().count || 0);
+        }
+    } catch (e) {
+        console.warn('Erro ao carregar visitas:', e);
     }
 }
 
