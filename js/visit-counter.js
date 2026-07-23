@@ -1,73 +1,50 @@
 (function() {
-    if (sessionStorage.getItem('lep_visit_counted')) return;
-
-    function initCounter() {
-        if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length && window.APP_CONFIG) {
-            var db = firebase.firestore();
-            var docRef = db.collection('stats').doc('visits');
-            docRef.update({
-                count: firebase.firestore.FieldValue.increment(1),
-                lastVisit: firebase.firestore.FieldValue.serverTimestamp(),
-                lastPage: window.location.pathname
-            }).catch(function() {
-                docRef.set({
-                    count: 1,
-                    lastVisit: firebase.firestore.FieldValue.serverTimestamp(),
-                    lastPage: window.location.pathname
-                });
-            });
-            sessionStorage.setItem('lep_visit_counted', '1');
-            return true;
+    function contar() {
+        if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) {
+            console.log('⏳ visit-counter: Firebase não disponível ainda');
+            return false;
         }
-        return false;
+        try {
+            var db = firebase.firestore();
+            var ref = db.collection('admins').doc('visitas');
+            ref.update({
+                visitas: firebase.firestore.FieldValue.increment(1),
+                ultimaVisita: firebase.firestore.FieldValue.serverTimestamp(),
+                pagina: window.location.pathname
+            }).then(function() {
+                console.log('✅ Visita contada!');
+            }).catch(function(err) {
+                if (err.code === 'not-found') {
+                    ref.set({
+                        visitas: 1,
+                        ultimaVisita: firebase.firestore.FieldValue.serverTimestamp(),
+                        pagina: window.location.pathname
+                    }).then(function() {
+                        console.log('✅ Primeira visita registrada!');
+                    }).catch(function(err2) {
+                        console.error('❌ Erro ao criar documento:', err2);
+                    });
+                } else {
+                    console.error('❌ Erro ao atualizar visita:', err);
+                }
+            });
+            return true;
+        } catch(e) {
+            console.error('❌ Erro no visit-counter:', e);
+            return false;
+        }
     }
 
-    if (initCounter()) return;
+    if (contar()) return;
 
+    var tentativas = 0;
     var check = setInterval(function() {
-        if (initCounter()) clearInterval(check);
-    }, 300);
-
-    setTimeout(function() {
-        clearInterval(check);
-        if (!sessionStorage.getItem('lep_visit_counted')) {
-            var appScript = document.createElement('script');
-            appScript.src = 'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js';
-            appScript.onload = function() {
-                var fsScript = document.createElement('script');
-                fsScript.src = 'https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js';
-                fsScript.onload = function() {
-                    var configScript = document.createElement('script');
-                    configScript.src = 'js/config.js';
-                    configScript.onload = function() {
-                        firebase.initializeApp({
-                            apiKey: window.APP_CONFIG.FIREBASE_API_KEY,
-                            authDomain: window.APP_CONFIG.FIREBASE_AUTH_DOMAIN,
-                            projectId: window.APP_CONFIG.FIREBASE_PROJECT_ID,
-                            storageBucket: window.APP_CONFIG.FIREBASE_STORAGE_BUCKET,
-                            messagingSenderId: window.APP_CONFIG.FIREBASE_MESSAGING_SENDER_ID,
-                            appId: window.APP_CONFIG.FIREBASE_APP_ID
-                        });
-                        var db = firebase.firestore();
-                        var docRef = db.collection('stats').doc('visits');
-                        docRef.update({
-                            count: firebase.firestore.FieldValue.increment(1),
-                            lastVisit: firebase.firestore.FieldValue.serverTimestamp(),
-                            lastPage: window.location.pathname
-                        }).catch(function() {
-                            docRef.set({
-                                count: 1,
-                                lastVisit: firebase.firestore.FieldValue.serverTimestamp(),
-                                lastPage: window.location.pathname
-                            });
-                        });
-                        sessionStorage.setItem('lep_visit_counted', '1');
-                    };
-                    document.head.appendChild(configScript);
-                };
-                document.head.appendChild(fsScript);
-            };
-            document.head.appendChild(appScript);
+        tentativas++;
+        if (contar()) {
+            clearInterval(check);
+        } else if (tentativas >= 30) {
+            clearInterval(check);
+            console.log('❌ visit-counter: Firebase não inicializado após 30 tentativas');
         }
-    }, 3000);
+    }, 500);
 })();

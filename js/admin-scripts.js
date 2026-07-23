@@ -246,10 +246,12 @@ function updateStatElement(elementId, value) {
 async function carregarVisitas() {
     try {
         if (!adminFirebase || !adminFirebase.db) return;
-        var doc = await adminFirebase.db.collection('stats').doc('visits').get();
+        var doc = await adminFirebase.db.collection('admins').doc('visitas').get();
         var visitsEl = document.getElementById('totalVisitas');
         if (visitsEl && doc.exists) {
-            animateCounter(visitsEl, doc.data().count || 0);
+            animateCounter(visitsEl, doc.data().visitas || 0);
+        } else if (visitsEl) {
+            visitsEl.textContent = '0';
         }
     } catch (e) {
         console.warn('Erro ao carregar visitas:', e);
