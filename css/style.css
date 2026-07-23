@@ -3463,3 +3463,19 @@ footer {
     color: #999;
     text-decoration: line-through;
 }
+
+/* Estrelas de avaliação */
+.estrelas-container .estrela {
+    cursor: pointer;
+    transition: color 0.2s, transform 0.15s;
+}
+.estrelas-container .estrela:hover {
+    transform: scale(1.2);
+}
+.estrelas-container .estrela.ativa {
+    color: #f5b301;
+}
+.estrelas-container .estrela.selecionada {
+    color: #f5b301;
+    text-shadow: 0 0 8px rgba(245, 179, 1, 0.4);
+}

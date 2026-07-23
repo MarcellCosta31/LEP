@@ -16,20 +16,20 @@
 <body>
     <!-- Substituir esta parte no header -->
     <!-- Substitua o header existente no index.html por este -->
-<header class="header">
-    <div class="header-left">
-        <h1>LEP</h1>
-        <span>Reserva do Laboratório de Informática</span>
-    </div>
-    <div class="header-right">
-        <nav class="nav-telas">
-            <a href="index.html" class="nav-link active">🏠 Início</a>
-            <a href="mapa.html" class="nav-link">🗺️ Informações</a>
-        </nav>
-        <button id="btnAbrirModal">+ Nova Reserva</button>
-        <a href="login.html" class="admin-link">Área Admin</a>
-    </div>
-</header>
+    <header class="header">
+        <div class="header-left">
+            <h1>LEP</h1>
+            <span>Reserva do Laboratório de Informática</span>
+        </div>
+        <div class="header-right">
+            <nav class="nav-telas">
+                <a href="index.html" class="nav-link active">🏠 Início</a>
+                <a href="mapa.html" class="nav-link">🗺️ Informações</a>
+            </nav>
+            <button id="btnAbrirModal">+ Nova Reserva</button>
+            <a href="login.html" class="admin-link">Área Admin</a>
+        </div>
+    </header>
 
     <main class="container">
         <!-- CALENDÁRIO -->
@@ -61,21 +61,21 @@
                     </div>
 
                     <div class="turno-linha">
-                        <div class="hora-col">08h às 12h</div>
-                        <div class="dia-col" data-dia="seg" data-turno="manha">Camila</div>
+                        <div class="hora-col">08:00 - 12:00</div>
+                        <div class="dia-col" data-dia="seg" data-turno="manha">Marcell</div>
                         <div class="dia-col" data-dia="ter" data-turno="manha">Camila</div>
-                        <div class="dia-col" data-dia="qua" data-turno="manha">Fernanda</div>
-                        <div class="dia-col" data-dia="qui" data-turno="manha">Maria Alice</div>
-                        <div class="dia-col" data-dia="sex" data-turno="manha">Ronald</div>
+                        <div class="dia-col" data-dia="qua" data-turno="manha">Maria Alice</div>
+                        <div class="dia-col" data-dia="qui" data-turno="manha">Fernanda</div>
+                        <div class="dia-col" data-dia="sex" data-turno="manha">Eva</div>
                     </div>
 
                     <div class="turno-linha">
-                        <div class="hora-col">14h às 17h</div>
+                        <div class="hora-col">14:00 - 17:00</div>
                         <div class="dia-col" data-dia="seg" data-turno="tarde">Marcell</div>
-                        <div class="dia-col" data-dia="ter" data-turno="tarde">Fernanda</div>
+                        <div class="dia-col" data-dia="ter" data-turno="tarde">Davi</div>
                         <div class="dia-col" data-dia="qua" data-turno="tarde">Maria Alice</div>
-                        <div class="dia-col" data-dia="qui" data-turno="tarde">Marcell</div>
-                        <div class="dia-col" data-dia="sex" data-turno="tarde">Ronald</div>
+                        <div class="dia-col" data-dia="qui" data-turno="tarde">Davi</div>
+                        <div class="dia-col" data-dia="sex" data-turno="tarde">Eva</div>
                     </div>
                 </div>
             </div>
@@ -254,7 +254,8 @@
 
                 <div id="codigoDocenteContainer" style="display: none;">
                     <label for="codigoDocente">Código de Acesso - Docente FEI</label>
-                    <input type="password" id="codigoDocente" name="codigoDocente" placeholder="Digite seu código de acesso">
+                    <input type="password" id="codigoDocente" name="codigoDocente"
+                        placeholder="Digite seu código de acesso">
                     <p id="mensagemCodigoDocente" style="font-size: 0.85rem; margin-top: 5px; color: #666;"></p>
                 </div>
 
@@ -403,20 +404,53 @@
             </div>
             <div style="padding: 20px 10px;">
                 <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 20px;">
-                    Para a aprovação da reserva é necessário enviar um ofício para o e-mail abaixo, a aprovação da reserva leva até 5 dias de análise.
+                    Para a aprovação da reserva é necessário enviar um ofício para o e-mail abaixo, a aprovação da
+                    reserva leva até 5 dias de análise.
                 </p>
                 <p style="font-size: 1rem; font-weight: bold; color: #004aad; margin-bottom: 25px;">
                     lep.ufpa@gmail.com
                 </p>
-                <button type="button" id="btnFecharAvisoAnalise" class="btn-primary" disabled style="padding: 12px 40px; font-size: 1rem; opacity: 0.6;">
+                <button type="button" id="btnFecharAvisoAnalise" class="btn-primary" disabled
+                    style="padding: 12px 40px; font-size: 1rem; opacity: 0.6;">
                     Fechar (<span id="contadorAviso">5</span>s)
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- MODAL DE AVALIAÇÃO -->
+    <div class="modal" id="modalAvaliacao">
+        <div class="modal-content" style="max-width: 460px; text-align: center;">
+            <div class="modal-header" style="border-bottom: none;">
+                <h2 style="color: #004aad;">Avalie o Serviço</h2>
+            </div>
+            <div style="padding: 10px 20px 20px;">
+                <p style="font-size: 1rem; color: #555; margin-bottom: 20px;">
+                    Como você avalia sua experiência ao fazer a reserva?
+                </p>
+                <div class="estrelas-container"
+                    style="font-size: 42px; margin-bottom: 20px; cursor: pointer; user-select: none;">
+                    <span class="estrela" data-valor="1" style="color: #ddd; transition: color 0.2s;">★</span>
+                    <span class="estrela" data-valor="2" style="color: #ddd; transition: color 0.2s;">★</span>
+                    <span class="estrela" data-valor="3" style="color: #ddd; transition: color 0.2s;">★</span>
+                    <span class="estrela" data-valor="4" style="color: #ddd; transition: color 0.2s;">★</span>
+                    <span class="estrela" data-valor="5" style="color: #ddd; transition: color 0.2s;">★</span>
+                </div>
+                <textarea id="comentarioAvaliacao" placeholder="Conte-nos sua opinião (opcional)..."
+                    style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; resize: vertical; box-sizing: border-box; min-height: 80px; font-family: inherit;"></textarea>
+                <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
+                    <button id="btnEnviarAvaliacao" class="btn-primary" style="padding: 12px 30px; font-size: 1rem;"
+                        disabled>Enviar Avaliação</button>
+                    <button id="btnPularAvaliacao" class="btn-secondary"
+                        style="padding: 12px 30px; font-size: 1rem;">Pular</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
-        © 2026 - Laboratório de Engenharia de Produção
+        © 2026 - Laboratório de Engenharia de Produção<br>
+        Desenvolvido por Marcell Costa
     </footer>
 
     <script src="js/config.js"></script>

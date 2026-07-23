@@ -2376,13 +2376,15 @@ document.addEventListener('DOMContentLoaded', function () {
             if (precisaAnalise) {
                 mensagemFeedback = 'Reserva(s) enviada(s) para análise!';
                 tipoFeedback = 'aviso';
-                abrirModalAvisoAnalise();
+                abrirModalAvisoAnalise(true);
             } else if (temTurnoNoite) {
                 mensagemFeedback = 'Reserva(s) enviada(s) para análise!';
                 tipoFeedback = 'aviso';
+                setTimeout(abrirModalAvaliacao, 500);
             } else {
                 mensagemFeedback = 'Reserva(s) aprovada(s) com sucesso!';
                 tipoFeedback = 'sucesso';
+                setTimeout(abrirModalAvaliacao, 500);
             }
             mostrarFeedback(mensagemFeedback, tipoFeedback);
 
@@ -2449,8 +2451,95 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 5000);
     }
 
+    // 🔧 FUNÇÃO PARA ABRIR MODAL DE AVALIAÇÃO
+    var avaliacaoReservaData = null;
+
+    function abrirModalAvaliacao() {
+        var modalAvaliacao = document.getElementById('modalAvaliacao');
+        var estrelas = document.querySelectorAll('.estrela');
+        var btnEnviar = document.getElementById('btnEnviarAvaliacao');
+        var btnPular = document.getElementById('btnPularAvaliacao');
+        var comentario = document.getElementById('comentarioAvaliacao');
+        if (!modalAvaliacao) return;
+
+        var notaSelecionada = 0;
+
+        estrelas.forEach(function(el) {
+            el.classList.remove('ativa', 'selecionada');
+            el.style.color = '#ddd';
+        });
+        comentario.value = '';
+        btnEnviar.disabled = true;
+
+        function atualizarEstrelas(nota) {
+            estrelas.forEach(function(el) {
+                var v = parseInt(el.dataset.valor);
+                if (v <= nota) {
+                    el.style.color = '#f5b301';
+                } else {
+                    el.style.color = '#ddd';
+                }
+            });
+        }
+
+        estrelas.forEach(function(el) {
+            el.onmouseenter = function() {
+                var v = parseInt(this.dataset.valor);
+                atualizarEstrelas(v);
+            };
+            el.onmouseleave = function() {
+                atualizarEstrelas(notaSelecionada);
+            };
+            el.onclick = function() {
+                notaSelecionada = parseInt(this.dataset.valor);
+                atualizarEstrelas(notaSelecionada);
+                btnEnviar.disabled = false;
+            };
+        });
+
+        btnEnviar.onclick = function() {
+            if (notaSelecionada === 0) return;
+            btnEnviar.disabled = true;
+            btnEnviar.textContent = 'Enviando...';
+
+            var dados = {
+                nota: notaSelecionada,
+                comentario: comentario.value.trim() || '',
+                data: new Date().toISOString(),
+                pagina: window.location.pathname
+            };
+
+            var ref = db.collection('admins').doc('_avaliacoes');
+            ref.update({
+                lista: firebase.firestore.FieldValue.arrayUnion(dados)
+            }).catch(function() {
+                return ref.set({ lista: [dados] });
+            }).then(function() {
+                console.log('✅ Avaliação salva!');
+                modalAvaliacao.style.display = 'none';
+                btnEnviar.textContent = 'Enviar Avaliação';
+            }).catch(function(err) {
+                console.error('❌ Erro ao salvar avaliação:', err);
+                btnEnviar.textContent = 'Enviar Avaliação';
+                btnEnviar.disabled = false;
+            });
+        };
+
+        btnPular.onclick = function() {
+            modalAvaliacao.style.display = 'none';
+        };
+
+        modalAvaliacao.addEventListener('click', function(e) {
+            if (e.target === modalAvaliacao) {
+                modalAvaliacao.style.display = 'none';
+            }
+        });
+
+        modalAvaliacao.style.display = 'flex';
+    }
+
     // 🔧 FUNÇÃO PARA ABRIR MODAL DE AVISO DE ANÁLISE
-    function abrirModalAvisoAnalise() {
+    function abrirModalAvisoAnalise(comAvaliacao) {
         const modalAviso = document.getElementById('modalAvisoAnalise');
         const btnFechar = document.getElementById('btnFecharAvisoAnalise');
         const contador = document.getElementById('contadorAviso');
@@ -2480,6 +2569,7 @@ document.addEventListener('DOMContentLoaded', function () {
             btnFechar.style.opacity = '0.6';
             contador.textContent = '5';
             clearInterval(timer);
+            if (comAvaliacao) setTimeout(abrirModalAvaliacao, 300);
         };
 
         modalAviso.addEventListener('click', function (e) {
@@ -2489,6 +2579,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 btnFechar.style.opacity = '0.6';
                 contador.textContent = '5';
                 clearInterval(timer);
+                if (comAvaliacao) setTimeout(abrirModalAvaliacao, 300);
             }
         });
     }
@@ -2532,32 +2623,6 @@ document.addEventListener('DOMContentLoaded', function () {
             atualizarDiasSelecionados();
         });
     });
-
-    // 🔧 FUNÇÃO DE DEPURAÇÃO
-    function depurarDatas() {
-        console.log('=== DEPURAÇÃO DE DATAS ===');
-        console.log('Data atual:', dataAtual.toLocaleDateString('pt-BR'));
-        console.log('Dias selecionados:', diasSelecionados);
-        console.log('Turnos selecionados:', obterTurnosSelecionados());
-        console.log('Reservas existentes:', reservasExistentes.map(r => ({
-            id: r.id,
-            dias: r.dias,
-            diasLocal: r.dias ? r.dias.map(d => {
-                const dataUTC = parseDataStringUTC(d);
-                return dataUTC ? formatarDataLocalParaString(dataUTC) : d;
-            }) : [],
-            turno: r.turno,
-            responsavel: r.responsavel,
-            status: r.status
-        })));
-    }
-
-    // Adicionar botão de depuração
-    const debugBtn = document.createElement('button');
-    debugBtn.textContent = 'Debug Datas';
-    debugBtn.style.cssText = 'position:fixed;bottom:10px;right:10px;z-index:10000;background:#ff4444;color:white;border:none;padding:5px;border-radius:3px;font-size:12px;';
-    debugBtn.onclick = depurarDatas;
-    document.body.appendChild(debugBtn);
 
     // INICIALIZAÇÃO
     atualizarMiniCalendario();

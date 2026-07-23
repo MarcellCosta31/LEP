@@ -209,32 +209,3 @@ function showError(element, message) {
     }
 }
 
-// Adicionar botão de debug
-setTimeout(() => {
-    const debugBtn = document.createElement('button');
-    debugBtn.textContent = 'DEBUG';
-    debugBtn.style.cssText = `
-        position: fixed;
-        bottom: 10px;
-        left: 10px;
-        background: #ff4444;
-        color: white;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 4px;
-        z-index: 99999;
-        cursor: pointer;
-        font-size: 12px;
-    `;
-    debugBtn.onclick = () => {
-        console.log('=== DEBUG MANUAL ===');
-        console.log('Firebase:', typeof firebase);
-        console.log('adminFirebase:', window.adminFirebase);
-        console.log('Usuário atual:', adminFirebase?.getCurrentAdmin?.());
-        
-        if (adminFirebase && adminFirebase.debugAuth) {
-            adminFirebase.debugAuth();
-        }
-    };
-    document.body.appendChild(debugBtn);
-}, 2000);
